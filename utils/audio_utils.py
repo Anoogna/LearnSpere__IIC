@@ -35,7 +35,7 @@ class AudioUtils:
         sanitized = sanitized.strip('_')
         return sanitized if sanitized else "audio"
         
-    def generate_audio(self, text: str, language: str = "en", 
+    def generate_audio(self, text: str, language: str = "en",
                       slow: bool = False) -> Optional[Tuple[str, str]]:
         """
         Convert text to speech using gTTS
@@ -47,16 +47,19 @@ class AudioUtils:
             Tuple of (file_path, file_url) or None if error
         """
         try:
+            # Preprocess text for more natural speech
+            processed_text = self._preprocess_text_for_speech(text)
+
             # Clean text for file naming
             filename_text = self._sanitize_filename(text)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"audio_{filename_text}_{timestamp}.mp3"
             filepath = os.path.join(self.output_dir, filename)
-            
+
             # Generate audio
-            tts = gTTS(text=text, lang=language, slow=slow)
+            tts = gTTS(text=processed_text, lang=language, slow=slow)
             tts.save(filepath)
-            
+
             # Return relative path for web access
             web_path = filepath.replace('\\', '/')
             return filepath, f"/{web_path}"
@@ -64,6 +67,41 @@ class AudioUtils:
             print(f"Error generating audio: {str(e)}")
             return None
     
+    def _preprocess_text_for_speech(self, text: str) -> str:
+        """
+        Preprocess text to make it sound more natural when spoken
+        Args:
+            text: Raw text to preprocess
+        Returns:
+            Processed text optimized for speech synthesis
+        """
+        # Remove excessive punctuation that sounds robotic
+        text = re.sub(r'[;:!]', '.', text)  # Replace ;:! with periods for pauses
+        text = re.sub(r',+', ',', text)  # Remove multiple commas
+        text = re.sub(r'\.+', '.', text)  # Remove multiple periods
+
+        # Handle common abbreviations that should be spoken naturally
+        text = re.sub(r'\bDr\.', 'Doctor', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bMr\.', 'Mister', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bMrs\.', 'Misses', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bMs\.', 'Miss', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bvs\.', 'versus', text, flags=re.IGNORECASE)
+        text = re.sub(r'\be\.g\.', 'for example', text, flags=re.IGNORECASE)
+        text = re.sub(r'\bi\.e\.', 'that is', text, flags=re.IGNORECASE)
+        text = re.sub(r'\betc\.', 'et cetera', text, flags=re.IGNORECASE)
+
+        # Handle numbers and percentages
+        text = re.sub(r'(\d+)%', r'\1 percent', text)
+
+        # Remove excessive whitespace
+        text = re.sub(r'\s+', ' ', text).strip()
+
+        # Add natural pauses after sentences (gTTS handles this somewhat)
+        # But we can help by ensuring proper spacing
+        text = re.sub(r'\.([A-Z])', r'. \1', text)
+
+        return text
+
     def generate_educational_audio(self, script: str, topic: str = "ML Lesson",
                                   speed: float = 1.0) -> Optional[Tuple[str, str]]:
         """
@@ -78,19 +116,22 @@ class AudioUtils:
         try:
             # Remove markers like [PAUSE]
             clean_script = script.replace('[PAUSE]', ' ')
-            
+
+            # Preprocess text for more natural speech
+            clean_script = self._preprocess_text_for_speech(clean_script)
+
             # Limit length for practical purposes
             if len(clean_script) > 5000:
                 clean_script = clean_script[:5000] + "..."
-            
+
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             topic_sanitized = self._sanitize_filename(topic)
             filename = f"lesson_{topic_sanitized}_{timestamp}.mp3"
             filepath = os.path.join(self.output_dir, filename)
-            
+
             tts = gTTS(text=clean_script, lang='en', slow=(speed < 1.0))
             tts.save(filepath)
-            
+
             web_path = filepath.replace('\\', '/')
             return filepath, f"/{web_path}"
         except Exception as e:

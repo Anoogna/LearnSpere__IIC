@@ -7,10 +7,14 @@
   --danger-color: #e74c3c;
   --warning-color: #f39c12;
   --info-color: #3498db;
-  --light-bg: #f8f9fa;
-  --dark-text: #2c3e50;
-  --border-color: #e0e6ed;
-  --shadow: 0 2px 10px rgba(0,0,0,0.1);
+  --dark-bg: linear-gradient(135deg, #000000, #1a1a1a, #000000);
+  --dark-bg-solid: #1a1a1a;
+  --light-text: #ffffff;
+  --light-text-secondary: #cccccc;
+  --border-color: #333333;
+  --shadow: 0 2px 10px rgba(0,0,0,0.5);
+  --card-bg: #1a1a1a;
+  --input-bg: #2a2a2a;
 }
 
 * {
@@ -25,10 +29,12 @@ html {
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--light-bg);
-  color: var(--dark-text);
+  background: var(--dark-bg);
+  background-attachment: fixed;
+  color: var(--light-text);
   line-height: 1.6;
   font-size: 1rem;
+  font-weight: bold;
 }
 
 /* ============================================
@@ -59,28 +65,80 @@ main {
   z-index: 100;
 }
 
-.navbar .container {
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.5rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 2rem;
 }
 
-.navbar h1 {
+.navbar-brand h1 {
   font-size: 1.5rem;
   margin: 0;
   font-weight: 700;
-}
-
-.navbar a {
   color: white;
-  text-decoration: none;
-  margin-left: 2rem;
-  transition: opacity 0.3s;
 }
 
-.navbar a:hover {
+.navbar-auth {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-name {
+  color: white;
+  margin-right: 1rem;
+  font-weight: 500;
+}
+
+.btn-nav-primary,
+.btn-nav-secondary,
+.btn-nav-danger {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  transition: all 0.3s;
+  font-size: 0.9rem;
+}
+
+.btn-nav-primary {
+  background-color: rgba(255,255,255,0.3);
+  color: white;
+  border: 2px solid white;
+}
+
+.btn-nav-primary:hover {
+  background-color: white;
+  color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.btn-nav-secondary {
+  background-color: transparent;
+  color: white;
+  border: none;
+}
+
+.btn-nav-secondary:hover {
+  text-decoration: underline;
   opacity: 0.8;
+}
+
+.btn-nav-danger {
+  background-color: rgba(231, 76, 60, 0.8);
+  color: white;
+  border: none;
+}
+
+.btn-nav-danger:hover {
+  background-color: var(--danger-color);
+  transform: translateY(-2px);
 }
 
 /* ============================================
@@ -95,7 +153,7 @@ main {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: var(--dark-text);
+  color: var(--light-text);
 }
 
 input[type="text"],
@@ -111,6 +169,8 @@ select {
   font-size: 1rem;
   font-family: inherit;
   transition: border-color 0.3s, box-shadow 0.3s;
+  background: var(--input-bg);
+  color: var(--light-text);
 }
 
 input[type="text"]:focus,
@@ -147,14 +207,18 @@ button,
 }
 
 .btn-primary {
-  background-color: var(--primary-color);
-  color: white;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 .btn-primary:hover {
-  background-color: var(--secondary-color);
+  background: linear-gradient(135deg, #5a67d8, #6b46c1);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  color: #ffffff;
 }
 
 .btn-primary:disabled {
@@ -195,12 +259,13 @@ button,
    ============================================ */
 
 .card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 10px;
   padding: 2rem;
   box-shadow: var(--shadow);
   margin-bottom: 2rem;
   transition: transform 0.3s, box-shadow 0.3s;
+  color: var(--light-text);
 }
 
 .card:hover {
@@ -209,12 +274,13 @@ button,
 }
 
 .feature-card {
-  background: white;
+  background: var(--card-bg);
   padding: 2rem;
   border-radius: 10px;
   box-shadow: var(--shadow);
   text-align: center;
   transition: transform 0.3s;
+  color: var(--light-text);
 }
 
 .feature-card:hover {
@@ -231,9 +297,9 @@ button,
    ============================================ */
 
 h1, h2, h3, h4, h5, h6 {
-  color: var(--dark-text);
+  color: var(--light-text);
   margin-bottom: 1rem;
-  font-weight: 700;
+  font-weight: 900;
 }
 
 h1 { font-size: 2.5rem; }
@@ -246,6 +312,7 @@ h6 { font-size: 1rem; }
 p {
   margin-bottom: 1rem;
   line-height: 1.7;
+  font-weight: bold;
 }
 
 a {

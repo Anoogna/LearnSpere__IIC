@@ -29,13 +29,16 @@ class ImageUtils:
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         
     def generate_image_from_prompt(self, prompt: str, filename: Optional[str] = None,
-                                  use_api: str = "placeholder") -> Optional[Tuple[str, str]]:
+                                  use_api: str = "placeholder", diagram_type: str = None,
+                                  variation: int = 0) -> Optional[Tuple[str, str]]:
         """
         Generate image using AI model or placeholder diagram
         Args:
             prompt: Detailed prompt for image generation
             filename: Optional custom filename
             use_api: "stable_diffusion", "placeholder", or any other (defaults to placeholder)
+            diagram_type: Force a specific diagram type ("neural_network", "decision_tree", "flowchart", "architecture", "generic")
+            variation: Visual variation (0-4) for different styles of the same diagram type
         Returns:
             Tuple of (file_path, file_url) or None if error
         """
@@ -44,7 +47,7 @@ class ImageUtils:
                 return self._generate_with_stable_diffusion(prompt, filename)
             else:
                 # Default to smart placeholder diagram generation
-                return self._generate_placeholder_diagram(prompt, filename)
+                return self._generate_placeholder_diagram(prompt, filename, diagram_type, variation)
         except Exception as e:
             print(f"Error generating image: {str(e)}")
             return None
@@ -55,17 +58,23 @@ class ImageUtils:
         Requires HF_TOKEN environment variable
         """
         try:
-            hf_token = os.getenv('HF_TOKEN')
-            if not hf_token:
-                print("HF_TOKEN not set for Stable Diffusion")
+            hf_token = os.getenv('HF_TOKEN', '').strip()
+            
+            # Check if token is valid (not placeholder or empty)
+            if not hf_token or hf_token == 'your-huggingface-token-here':
+                print("[ERROR] HF_TOKEN not set or is placeholder for Stable Diffusion")
+                print("   Get your token from: https://huggingface.co/settings/tokens")
                 return None
             
             api_url = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2"
             headers = {"Authorization": f"Bearer {hf_token}"}
+            payload = {"inputs": prompt}
             
-            response = requests.post(api_url, headers=headers, json={"inputs": prompt})
+            print(f"[INFO] Calling Stable Diffusion API with prompt: {prompt[:50]}...")
+            response = requests.post(api_url, headers=headers, json=payload, timeout=30)
             
             if response.status_code == 200:
+                print("[SUCCESS] Stable Diffusion API returned 200 OK")
                 image_data = response.content
                 
                 if filename is None:
@@ -76,17 +85,52 @@ class ImageUtils:
                 with open(filepath, 'wb') as f:
                     f.write(image_data)
                 
+                print(f"[SUCCESS] Image saved to: {filepath}")
                 web_path = filepath.replace('\\', '/')
                 return filepath, f"/{web_path}"
+            
+            elif response.status_code == 503:
+                print(f"[ERROR] Stable Diffusion model is loading (503 error). Try again in a moment.")
+                try:
+                    error_data = response.json()
+                    if 'estimated_time' in error_data:
+                        print(f"   Estimated reload time: {error_data['estimated_time']} seconds")
+                except:
+                    pass
+                return None
+            
+            elif response.status_code == 401:
+                print(f"[ERROR] Authentication failed (401). Invalid HF_TOKEN.")
+                return None
+            
+            elif response.status_code == 429:
+                print(f"[ERROR] Rate limited (429). Too many requests. Please wait.")
+                return None
+            
+            else:
+                print(f"[ERROR] Stable Diffusion API error ({response.status_code}): {response.text[:200]}")
+                return None
+                
+        except requests.exceptions.Timeout:
+            print(f"[ERROR] Stable Diffusion request timed out (30 seconds). Model may be slow to respond.")
+            return None
+        except requests.exceptions.ConnectionError:
+            print(f"[ERROR] Connection error to Stable Diffusion API. Check your internet connection.")
+            return None
         except Exception as e:
-            print(f"Stable Diffusion generation failed: {str(e)}")
-        
-        return None
+            print(f"[ERROR] Stable Diffusion generation failed: {str(e)}")
+            return None
     
-    def _generate_placeholder_diagram(self, prompt: str, filename: Optional[str] = None) -> Optional[Tuple[str, str]]:
+    def _generate_placeholder_diagram(self, prompt: str, filename: Optional[str] = None, 
+                                    force_type: str = None, variation: int = 0) -> Optional[Tuple[str, str]]:
         """
         Generate a smart educational diagram using PIL
         Creates concept-aware diagrams based on the prompt content
+        Args:
+            prompt: The prompt/concept to visualize
+            filename: Optional custom filename
+            force_type: Force a specific diagram type instead of auto-detecting
+            variation: Visual variation (0-4) for different styles of the same diagram type
         """
         if not PIL_AVAILABLE:
             print("PIL not available for diagram generation")
@@ -99,19 +143,23 @@ class ImageUtils:
             
             filepath = os.path.join(self.output_dir, filename)
             
-            # Detect diagram type from prompt
-            diagram_type = self._detect_diagram_type(prompt)
-            
-            if diagram_type == "neural_network":
-                return self._create_neural_network_diagram(filepath, prompt)
-            elif diagram_type == "decision_tree":
-                return self._create_decision_tree_diagram_auto(filepath, prompt)
-            elif diagram_type == "flowchart":
-                return self._create_flowchart_auto(filepath, prompt)
-            elif diagram_type == "architecture":
-                return self._create_architecture_diagram_auto(filepath, prompt)
+            # Determine diagram type
+            if force_type:
+                diagram_type = force_type.lower()
             else:
-                return self._create_generic_concept_diagram(filepath, prompt)
+                diagram_type = self._detect_diagram_type(prompt)
+            
+            # Generate the appropriate diagram
+            if diagram_type == "neural_network":
+                return self._create_neural_network_diagram(filepath, prompt, variation)
+            elif diagram_type == "decision_tree":
+                return self._create_decision_tree_diagram_auto(filepath, prompt, variation)
+            elif diagram_type == "flowchart":
+                return self._create_flowchart_auto(filepath, prompt, variation)
+            elif diagram_type == "architecture":
+                return self._create_architecture_diagram_auto(filepath, prompt, variation)
+            else:
+                return self._create_generic_concept_diagram(filepath, prompt, variation)
                 
         except Exception as e:
             print(f"Error generating diagram: {str(e)}")
@@ -132,8 +180,8 @@ class ImageUtils:
         else:
             return "generic"
     
-    def _create_neural_network_diagram(self, filepath: str, prompt: str) -> Tuple[str, str]:
-        """Create a neural network visualization"""
+    def _create_neural_network_diagram(self, filepath: str, prompt: str, variation: int = 0) -> Tuple[str, str]:
+        """Create a neural network visualization with style variations"""
         width, height = 1000, 700
         image = Image.new('RGB', (width, height), color=(255, 255, 255))
         draw = ImageDraw.Draw(image)
@@ -141,10 +189,20 @@ class ImageUtils:
         # Title
         draw.text((20, 20), "Neural Network Architecture", fill=(0, 0, 0))
         
-        # Draw layers
-        input_nodes = 4
-        hidden_nodes = 6
-        output_nodes = 2
+        # Different layer configs for variations
+        variations = [
+            {"input": 4, "hidden": 6, "output": 2, "color": (100, 150, 255)},  # Blue
+            {"input": 5, "hidden": 8, "output": 3, "color": (100, 200, 100)},  # Green
+            {"input": 3, "hidden": 7, "output": 2, "color": (255, 150, 100)},  # Orange
+            {"input": 6, "hidden": 10, "output": 4, "color": (200, 100, 255)},  # Purple
+            {"input": 4, "hidden": 5, "output": 3, "color": (255, 100, 150)},  # Pink
+        ]
+        
+        config = variations[variation % len(variations)]
+        input_nodes = config["input"]
+        hidden_nodes = config["hidden"]
+        output_nodes = config["output"]
+        color = config["color"]
         
         layer_pos = [
             (100, input_nodes),
@@ -164,7 +222,7 @@ class ImageUtils:
             for i in range(num_nodes):
                 y = y_start + i * 80
                 node_positions.append((x, y))
-                draw.ellipse([x-15, y-15, x+15, y+15], fill=(100, 150, 255), outline=(0, 0, 100), width=2)
+                draw.ellipse([x-15, y-15, x+15, y+15], fill=color, outline=(0, 0, 100), width=2)
                 draw.text((x-5, y-5), str(i+1), fill=(255, 255, 255))
             
             # Draw connections to next layer
@@ -175,14 +233,13 @@ class ImageUtils:
                 for i, (nx, ny) in enumerate(node_positions):
                     for j in range(next_num):
                         next_y = next_y_start + j * 80
-                        # Draw thin connection lines
                         draw.line([(nx, ny), (next_x, next_y)], fill=(150, 150, 150), width=1)
         
         image.save(filepath)
         return filepath, f"/{filepath.replace(chr(92), '/')}"
     
-    def _create_decision_tree_diagram_auto(self, filepath: str, prompt: str) -> Tuple[str, str]:
-        """Create an enhanced decision tree diagram"""
+    def _create_decision_tree_diagram_auto(self, filepath: str, prompt: str, variation: int = 0) -> Tuple[str, str]:
+        """Create an enhanced decision tree diagram with variations"""
         width, height = 900, 700
         image = Image.new('RGB', (width, height), color=(255, 255, 255))
         draw = ImageDraw.Draw(image)
@@ -190,9 +247,20 @@ class ImageUtils:
         # Title
         draw.text((20, 20), "Decision Tree", fill=(0, 0, 0))
         
+        # Color schemes for variations
+        color_schemes = [
+            {"root": (100, 200, 100), "branch": (150, 150, 200), "leaf": (200, 100, 100)},
+            {"root": (100, 150, 255), "branch": (200, 200, 100), "leaf": (255, 150, 100)},
+            {"root": (200, 100, 150), "branch": (150, 200, 150), "leaf": (100, 150, 255)},
+            {"root": (255, 180, 100), "branch": (150, 150, 255), "leaf": (100, 255, 150)},
+            {"root": (150, 255, 100), "branch": (255, 150, 150), "leaf": (100, 150, 255)},
+        ]
+        
+        colors = color_schemes[variation % len(color_schemes)]
+        
         # Root node
         root_x, root_y = 450, 80
-        draw.rectangle([root_x-70, root_y-30, root_x+70, root_y+30], fill=(100, 200, 100), outline=(0, 0, 0), width=2)
+        draw.rectangle([root_x-70, root_y-30, root_x+70, root_y+30], fill=colors["root"], outline=(0, 0, 0), width=2)
         draw.text((root_x-50, root_y-15), "Root Node", fill=(255, 255, 255))
         
         # Level 2 nodes (branches)
@@ -205,7 +273,7 @@ class ImageUtils:
             # Draw connector
             draw.line([(root_x, root_y+30), (x, y-30)], fill=(0, 0, 0), width=2)
             # Draw node
-            draw.rectangle([x-60, y-30, x+60, y+30], fill=(150, 150, 200), outline=(0, 0, 0), width=2)
+            draw.rectangle([x-60, y-30, x+60, y+30], fill=colors["branch"], outline=(0, 0, 0), width=2)
             draw.text((x-40, y-15), label, fill=(255, 255, 255))
         
         # Level 3 leaf nodes
@@ -225,14 +293,14 @@ class ImageUtils:
         
         # Draw leaf nodes
         for x, y, label in level3_nodes:
-            draw.ellipse([x-40, y-30, x+40, y+30], fill=(200, 100, 100), outline=(0, 0, 0), width=2)
+            draw.ellipse([x-40, y-30, x+40, y+30], fill=colors["leaf"], outline=(0, 0, 0), width=2)
             draw.text((x-35, y-15), label, fill=(255, 255, 255))
         
         image.save(filepath)
         return filepath, f"/{filepath.replace(chr(92), '/')}"
     
-    def _create_flowchart_auto(self, filepath: str, prompt: str) -> Tuple[str, str]:
-        """Create an enhanced flowchart"""
+    def _create_flowchart_auto(self, filepath: str, prompt: str, variation: int = 0) -> Tuple[str, str]:
+        """Create an enhanced flowchart with variations"""
         width, height = 900, 700
         image = Image.new('RGB', (width, height), color=(255, 255, 255))
         draw = ImageDraw.Draw(image)
@@ -240,13 +308,24 @@ class ImageUtils:
         # Title
         draw.text((20, 20), "Process Flowchart", fill=(0, 0, 0))
         
+        # Color and layout variations
+        color_sets = [
+            [(100, 200, 100), (100, 150, 200), (100, 200, 100), (255, 200, 100), (100, 200, 100), (200, 100, 100)],
+            [(150, 200, 255), (200, 150, 100), (150, 200, 255), (100, 200, 150), (150, 200, 255), (255, 100, 150)],
+            [(200, 100, 150), (100, 200, 150), (200, 100, 150), (150, 150, 200), (200, 100, 150), (100, 150, 200)],
+            [(100, 150, 200), (255, 150, 100), (100, 150, 200), (150, 255, 100), (100, 150, 200), (100, 255, 150)],
+            [(255, 180, 100), (100, 180, 255), (255, 180, 100), (100, 255, 180), (255, 180, 100), (180, 100, 255)],
+        ]
+        
+        colors = color_sets[variation % len(color_sets)]
+        
         steps = [
-            ("START", 100, (100, 200, 100)),
-            ("Input Data", 200, (100, 150, 200)),
-            ("Process", 300, (100, 150, 200)),
-            ("Decision", 400, (255, 200, 100)),
-            ("Output", 500, (100, 200, 100)),
-            ("END", 600, (200, 100, 100))
+            ("START", 100, colors[0]),
+            ("Input Data", 200, colors[1]),
+            ("Process", 300, colors[2]),
+            ("Decision", 400, colors[3]),
+            ("Output", 500, colors[4]),
+            ("END", 600, colors[5])
         ]
         
         x = 450
@@ -271,8 +350,8 @@ class ImageUtils:
         image.save(filepath)
         return filepath, f"/{filepath.replace(chr(92), '/')}"
     
-    def _create_architecture_diagram_auto(self, filepath: str, prompt: str) -> Tuple[str, str]:
-        """Create an enhanced architecture diagram"""
+    def _create_architecture_diagram_auto(self, filepath: str, prompt: str, variation: int = 0) -> Tuple[str, str]:
+        """Create an enhanced architecture diagram with variations"""
         width, height = 900, 700
         image = Image.new('RGB', (width, height), color=(245, 245, 245))
         draw = ImageDraw.Draw(image)
@@ -280,11 +359,21 @@ class ImageUtils:
         # Title
         draw.text((20, 20), "System Architecture", fill=(0, 0, 0))
         
+        # Color schemes
+        color_schemes = [
+            [(100, 180, 255), (100, 255, 180), (255, 220, 100)],
+            [(255, 150, 100), (100, 200, 255), (150, 255, 100)],
+            [(200, 100, 150), (100, 200, 150), (150, 100, 200)],
+            [(100, 150, 200), (255, 180, 100), (100, 255, 150)],
+            [(180, 100, 200), (100, 180, 150), (200, 150, 100)],
+        ]
+        
+        colors = color_schemes[variation % len(color_schemes)]
+        
         layers = [
-            ("Frontend\n(React, Vue)", 100, (100, 180, 255)),
-            ("API Layer\n(REST, GraphQL)", 230, (100, 255, 180)),
-            ("Business Logic\n(Services)", 360, (255, 220, 100)),
-            ("Database Layer\n(SQL, NoSQL)", 490, (255, 150, 150))
+            ("Frontend\n(React, Vue)", 100, colors[0]),
+            ("API Layer\n(REST, GraphQL)", 230, colors[1]),
+            ("Database\n(SQL, NoSQL)", 360, colors[2])
         ]
         
         box_height = 100
@@ -303,8 +392,8 @@ class ImageUtils:
         image.save(filepath)
         return filepath, f"/{filepath.replace(chr(92), '/')}"
     
-    def _create_generic_concept_diagram(self, filepath: str, prompt: str) -> Tuple[str, str]:
-        """Create a generic concept diagram with visual elements"""
+    def _create_generic_concept_diagram(self, filepath: str, prompt: str, variation: int = 0) -> Tuple[str, str]:
+        """Create a generic concept diagram with visual elements and variations"""
         width, height = 900, 700
         image = Image.new('RGB', (width, height), color=(255, 255, 255))
         draw = ImageDraw.Draw(image)
@@ -312,9 +401,20 @@ class ImageUtils:
         # Title
         draw.text((20, 20), "Concept Visualization", fill=(0, 0, 0))
         
+        # Color schemes for variations
+        central_colors = [
+            {"main": (100, 150, 255), "concepts": [(150, 200, 255), (200, 255, 150), (255, 200, 150), (255, 150, 150), (200, 150, 255), (150, 255, 200)]},
+            {"main": (100, 200, 100), "concepts": [(150, 255, 150), (255, 150, 100), (150, 150, 255), (255, 255, 100), (100, 255, 255), (255, 100, 255)]},
+            {"main": (200, 100, 150), "concepts": [(255, 150, 200), (150, 255, 200), (200, 150, 255), (255, 200, 150), (150, 200, 255), (200, 255, 150)]},
+            {"main": (255, 150, 100), "concepts": [(255, 200, 150), (150, 255, 150), (150, 150, 255), (255, 150, 150), (150, 255, 255), (255, 255, 150)]},
+            {"main": (150, 150, 200), "concepts": [(200, 200, 255), (200, 255, 200), (255, 200, 200), (255, 200, 255), (200, 255, 255), (255, 255, 200)]},
+        ]
+        
+        colors = central_colors[variation % len(central_colors)]
+        
         # Central concept
         center_x, center_y = 450, 350
-        draw.ellipse([center_x-80, center_y-80, center_x+80, center_y+80], fill=(100, 150, 255), outline=(0, 0, 100), width=3)
+        draw.ellipse([center_x-80, center_y-80, center_x+80, center_y+80], fill=colors["main"], outline=(0, 0, 100), width=3)
         draw.text((center_x-70, center_y-20), "Main\nConcept", fill=(255, 255, 255))
         
         # Related concepts around
@@ -323,9 +423,8 @@ class ImageUtils:
         radius = 250
         
         concepts = ["Theory", "Practice", "Application", "Benefits", "Challenges", "Future"]
-        colors = [(150, 200, 255), (200, 255, 150), (255, 200, 150), (255, 150, 150), (200, 150, 255), (150, 255, 200)]
         
-        for i, (concept, color) in enumerate(zip(concepts, colors)):
+        for i, (concept, color) in enumerate(zip(concepts, colors["concepts"])):
             angle = 2 * math.pi * i / num_concepts
             x = center_x + int(radius * math.cos(angle))
             y = center_y + int(radius * math.sin(angle))

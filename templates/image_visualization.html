@@ -32,6 +32,14 @@
                         <option value="placeholder" selected>Smart Diagrams (Auto-Detected)</option>
                         <option value="stable_diffusion">Stable Diffusion (Requires API Key)</option>
                     </select>
+                    <small style="color: #666; margin-top: 0.3rem; display: block;">
+                        To use Stable Diffusion:
+                        <ol style="margin: 0.5rem 0 0 1rem; padding: 0;">
+                            <li>Get a free HuggingFace token from: <a href="https://huggingface.co/settings/tokens" target="_blank">huggingface.co/settings/tokens</a></li>
+                            <li>Add <code>HF_TOKEN=your-token</code> to your <code>.env</code> file</li>
+                            <li>Restart the server</li>
+                        </ol>
+                    </small>
                 </div>
                 
                 <button type="submit" class="btn-primary">

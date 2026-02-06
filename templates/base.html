@@ -8,8 +8,20 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="container">
-            <h1>ML Learning Assistant</h1>
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <h1>ML Learning Assistant</h1>
+            </div>
+            <div class="navbar-auth">
+                <span id="userDisplay" style="display: none;">
+                    <span id="currentUser" class="user-name"></span>
+                </span>
+                <a href="{{ url_for('login') }}" class="btn-nav-secondary" id="loginBtn">Login</a>
+                <a href="{{ url_for('register') }}" class="btn-nav-primary" id="registerBtn">Sign Up</a>
+                <form method="POST" action="{{ url_for('logout') }}" style="display: inline;" id="logoutForm">
+                    <button type="submit" class="btn-nav-danger" id="logoutBtn" style="display: none;">Logout</button>
+                </form>
+            </div>
         </div>
     </nav>
     
@@ -22,6 +34,7 @@
     </footer>
     
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

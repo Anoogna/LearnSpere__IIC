@@ -4,7 +4,7 @@ ML Learning Assistant - Main Flask Application
 GyanGuru: AI Powered Learning Assistant for AI & ML
 """
 
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
 from flask_cors import CORS
 from datetime import datetime
 import os
@@ -16,6 +16,8 @@ from utils.genai_utils import get_groq, init_groq
 from utils.audio_utils import get_audio, init_audio
 from utils.image_utils import get_images, init_images
 from utils.code_executor import get_code_executor, init_code_executor
+from utils.auth_utils import generate_token, verify_token, token_required, require_login
+from models.user import User, ensure_users_file
 
 # Load environment variables
 from dotenv import load_dotenv
@@ -25,6 +27,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max
+app.config['SESSION_TYPE'] = 'filesystem'
 
 # Enable CORS
 CORS(app)
@@ -34,6 +37,9 @@ os.makedirs('uploads', exist_ok=True)
 os.makedirs('uploads/audio', exist_ok=True)
 os.makedirs('uploads/images', exist_ok=True)
 os.makedirs('uploads/code', exist_ok=True)
+
+# Initialize user data file
+ensure_users_file()
 
 # Initialize utility modules
 init_groq(os.getenv('GROQ_API_KEY'))
@@ -79,6 +85,122 @@ def settings():
 def about():
     """About page"""
     return render_template('about.html')
+
+# ============================================
+# AUTHENTICATION ROUTES
+# ============================================
+
+@app.route('/api/register', methods=['GET', 'POST'])
+def register():
+    """User registration page"""
+    if request.method == 'GET':
+        return render_template('register.html')
+    
+    # Handle POST request
+    data = request.get_json()
+    username = data.get('username', '').strip()
+    email = data.get('email', '').strip()
+    password = data.get('password', '')
+    
+    try:
+        # Validate input
+        if not username or not email or not password:
+            return jsonify({'error': 'All fields are required'}), 400
+        
+        if len(username) < 3 or len(username) > 20:
+            return jsonify({'error': 'Username must be 3-20 characters'}), 400
+        
+        # Create user
+        User.create(username, email, password)
+        
+        return jsonify({'success': True, 'message': 'Account created successfully'}), 201
+    
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        print(f"[ERROR] Registration error: {str(e)}")
+        return jsonify({'error': 'Registration failed'}), 500
+
+@app.route('/api/login', methods=['GET', 'POST'])
+def login():
+    """User login page"""
+    if request.method == 'GET':
+        return render_template('login.html')
+    
+    # Handle POST request
+    data = request.get_json()
+    username = data.get('username', '').strip()
+    password = data.get('password', '')
+    
+    try:
+        if not username or not password:
+            return jsonify({'error': 'Username and password are required'}), 400
+        
+        user = User.authenticate(username, password)
+        
+        if not user:
+            return jsonify({'error': 'Invalid username or password'}), 401
+        
+        # Generate JWT token
+        token = generate_token(username)
+        
+        # Store in session
+        session['username'] = username
+        session.permanent = True  # Make session persist
+        
+        return jsonify({
+            'success': True, 
+            'token': token,
+            'username': username,
+            'message': 'Login successful'
+        }), 200
+    
+    except Exception as e:
+        print(f"[ERROR] Login error: {str(e)}")
+        return jsonify({'error': 'Login failed'}), 500
+
+@app.route('/logout', methods=['POST', 'GET'])
+def logout():
+    """User logout"""
+    session.clear()
+    return redirect(url_for('index'))
+
+@app.route('/api/check-auth', methods=['GET'])
+def check_auth():
+    """Check if user is authenticated"""
+    token = request.headers.get('Authorization')
+    username = None
+    
+    if token:
+        try:
+            username = verify_token(token.split(" ")[1])
+        except:
+            pass
+    
+    if not username and 'username' in session:
+        username = session['username']
+    
+    if username:
+        return jsonify({'authenticated': True, 'username': username}), 200
+    else:
+        return jsonify({'authenticated': False}), 200
+
+@app.route('/api/user-profile', methods=['GET'])
+@require_login
+def user_profile():
+    """Get current user profile"""
+    username = request.username
+    user = User.get_by_username(username)
+    
+    if user:
+        return jsonify({
+            'username': user.username,
+            'email': user.email,
+            'created_at': user.created_at,
+            'last_login': user.last_login
+        }), 200
+    else:
+        return jsonify({'error': 'User not found'}), 404
 
 # ============================================
 # API ROUTES - TEXT EXPLANATION
@@ -263,7 +385,7 @@ def generate_image():
         data = request.get_json()
         concept = data.get('concept', '')
         diagram_type = data.get('diagram_type', 'Conceptual')
-        backend = data.get('backend', 'gemini')
+        backend = data.get('backend', 'placeholder')
         
         if not concept:
             return jsonify({'error': 'Concept is required'}), 400
@@ -272,25 +394,33 @@ def generate_image():
         prompt = gemini.generate_image_prompt(concept, diagram_type)
         
         images = get_images()
-        filepath, webpath = images.generate_image_from_prompt(prompt, use_api=backend)
+        result = images.generate_image_from_prompt(prompt, use_api=backend)
         
-        if filepath:
+        # If Stable Diffusion fails, fallback to placeholder
+        if result is None and backend == 'stable_diffusion':
+            print("[WARNING] Stable Diffusion failed, falling back to Smart Diagrams")
+            result = images.generate_image_from_prompt(prompt, use_api='placeholder')
+        
+        if result and len(result) == 2:
+            filepath, webpath = result
             return jsonify({
                 'success': True,
                 'image_url': webpath,
                 'concept': concept,
                 'diagram_type': diagram_type,
                 'prompt': prompt,
+                'backend_used': 'placeholder' if backend == 'stable_diffusion' and result else backend,
                 'generated_at': datetime.now().isoformat()
             })
         else:
             return jsonify({'error': 'Failed to generate image'}), 500
     except Exception as e:
+        print(f"[ERROR] Error in /api/generate-image: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/generate-images-multiple', methods=['POST'])
 def generate_images_multiple():
-    """Generate multiple diagrams for a concept"""
+    """Generate multiple diagrams with different types and styles for a concept"""
     try:
         data = request.get_json()
         concept = data.get('concept', '')
@@ -303,18 +433,29 @@ def generate_images_multiple():
         images_obj = get_images()
         
         generated_images = []
+        diagram_types = ['Conceptual', 'Technical', 'Flowchart']
+        
         for i in range(count):
-            diagram_types = ['Conceptual', 'Technical', 'Flowchart']
+            # Vary diagram type among available options
             diagram_type = diagram_types[i % len(diagram_types)]
+            # Vary visual style with variation parameter (0-4)
+            variation = i % 5
             
             prompt = gemini.generate_image_prompt(concept, diagram_type)
-            filepath, webpath = images_obj.generate_image_from_prompt(prompt)
+            # Pass diagram_type to force specific type and variation for visual diversity
+            filepath, webpath = images_obj.generate_image_from_prompt(
+                prompt, 
+                diagram_type=diagram_type,
+                variation=variation,
+                use_api='placeholder'
+            )
             
             if filepath:
                 generated_images.append({
                     'image_url': webpath,
                     'diagram_type': diagram_type,
-                    'prompt': prompt
+                    'variation': variation,
+                    'prompt': prompt[:100] + '...' if len(prompt) > 100 else prompt
                 })
         
         return jsonify({
