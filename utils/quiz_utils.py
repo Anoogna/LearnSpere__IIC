@@ -6,6 +6,7 @@ Handles quiz generation, evaluation, and error-based teaching with AI integratio
 import json
 import os
 import random
+import uuid
 from typing import List, Dict, Optional, Tuple
 from utils.genai_utils import get_groq
 from utils.hf_utils import hf_manager
@@ -18,6 +19,104 @@ class QuizSystem:
         self.ensure_quiz_file()
         self.load_quizzes()
 
+    def _store_generated_quiz(self, quiz_data: Dict) -> str:
+        """Store a generated quiz so it can be retrieved later during submission."""
+        quiz_id = f"gen_{uuid.uuid4().hex}"
+        if not isinstance(quiz_data, dict):
+            quiz_data = {}
+        quiz_data["quiz_id"] = quiz_id
+        self.quizzes[quiz_id] = quiz_data
+
+        # Best-effort persistence (do not fail quiz generation if disk write fails)
+        try:
+            os.makedirs(os.path.dirname(self.quiz_file), exist_ok=True)
+            with open(self.quiz_file, 'w') as f:
+                json.dump(self.quizzes, f, indent=2)
+        except Exception:
+            pass
+
+        return quiz_id
+
+    def _extract_json_from_text(self, text: str) -> Optional[str]:
+        """Best-effort extraction of a JSON object from model output."""
+        if not text:
+            return None
+
+        cleaned = text.strip()
+
+        # Strip common markdown code fences
+        if cleaned.startswith("```"):
+            # Remove opening fence line
+            cleaned_lines = cleaned.splitlines()
+            if cleaned_lines:
+                cleaned_lines = cleaned_lines[1:]
+            # Remove trailing fence
+            if cleaned_lines and cleaned_lines[-1].strip().startswith("```"):
+                cleaned_lines = cleaned_lines[:-1]
+            cleaned = "\n".join(cleaned_lines).strip()
+
+        # If the output contains extra text, attempt to locate the first JSON object
+        start = cleaned.find('{')
+        end = cleaned.rfind('}')
+        if start == -1 or end == -1 or end <= start:
+            return None
+        return cleaned[start:end + 1]
+
+    def _normalize_quiz_data(self, quiz_data: Dict, topic: str, difficulty: str) -> Dict:
+        """Normalize quiz schema to the app's expectations."""
+        if not isinstance(quiz_data, dict):
+            quiz_data = {}
+
+        quiz_data.setdefault("topic", topic)
+        quiz_data.setdefault("difficulty", difficulty)
+
+        questions = quiz_data.get("questions")
+        if not isinstance(questions, list):
+            questions = []
+
+        normalized_questions = []
+        letter_to_index = {"A": 0, "B": 1, "C": 2, "D": 3}
+
+        for q in questions:
+            if not isinstance(q, dict):
+                continue
+
+            q_text = str(q.get("question", "")).strip()
+            options = q.get("options", [])
+            if not isinstance(options, list):
+                options = []
+            options = [str(o).strip() for o in options if str(o).strip()]
+
+            # Ensure 4 options if possible
+            if len(options) < 4:
+                continue
+            options = options[:4]
+
+            correct = q.get("correct", 0)
+            if isinstance(correct, str):
+                correct_clean = correct.strip().upper()
+                if correct_clean in letter_to_index:
+                    correct = letter_to_index[correct_clean]
+                else:
+                    # try formats like "A)" or "A." etc
+                    correct = letter_to_index.get(correct_clean[:1], 0)
+            try:
+                correct_int = int(correct)
+            except Exception:
+                correct_int = 0
+            if correct_int < 0 or correct_int > 3:
+                correct_int = 0
+
+            normalized_questions.append({
+                "question": q_text,
+                "options": options,
+                "correct": correct_int,
+                "explanation": str(q.get("explanation", "")).strip() or "Generated explanation",
+            })
+
+        quiz_data["questions"] = normalized_questions
+        return quiz_data
+
     def generate_realtime_quiz(self, topic: str, difficulty: str = "Intermediate", num_questions: int = 5) -> Dict:
         """
         Generate a real-time quiz using Hugging Face and Groq AI
@@ -26,45 +125,83 @@ class QuizSystem:
             # Use Groq to generate quiz content
             groq_client = get_groq()
 
-            prompt = f"""
-            Generate {num_questions} multiple-choice questions for a {difficulty} level quiz on "{topic}" in Machine Learning.
+            prompt = f"""Return ONLY valid JSON (no markdown, no backticks, no extra text).
 
-            For each question, provide:
-            1. A clear, concise question
-            2. Four answer options (A, B, C, D)
-            3. The correct answer letter
-            4. A brief explanation of why it's correct
+Generate exactly {num_questions} multiple-choice questions for a {difficulty} level quiz on \"{topic}\" in Machine Learning.
 
-            Format as JSON:
-            {{
-                "topic": "{topic}",
-                "difficulty": "{difficulty}",
-                "questions": [
-                    {{
-                        "question": "Question text here?",
-                        "options": ["A) Option 1", "B) Option 2", "C) Option 3", "D) Option 4"],
-                        "correct": "A",
-                        "explanation": "Brief explanation here"
-                    }}
-                ]
-            }}
-            """
+JSON schema:
+{{
+  \"topic\": \"{topic}\",
+  \"difficulty\": \"{difficulty}\",
+  \"questions\": [
+    {{
+      \"question\": \"... ?\",
+      \"options\": [\"Option 1\", \"Option 2\", \"Option 3\", \"Option 4\"],
+      \"correct\": 0,
+      \"explanation\": \"...\"
+    }}
+  ]
+}}
+
+Rules:
+- \"correct\" must be an integer index 0-3 corresponding to \"options\".
+- \"options\" must contain exactly 4 strings.
+- Each question must be unique and relevant to the topic.
+"""
 
             # Generate quiz content
-            response = groq_client.generate_text_explanation(f"Generate quiz for {topic}", difficulty)
+            message = groq_client.client.chat.completions.create(
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                model=groq_client.model,
+                temperature=0.7,
+                max_tokens=2000,
+            )
+            response = message.choices[0].message.content
 
             # Try to parse as JSON, fallback to structured parsing
-            try:
-                quiz_data = json.loads(response)
-            except:
-                # Fallback: manually structure the response
+            quiz_data = None
+            extracted = self._extract_json_from_text(response)
+            if extracted:
+                try:
+                    quiz_data = json.loads(extracted)
+                except Exception:
+                    quiz_data = None
+
+            if not quiz_data:
                 quiz_data = self._parse_quiz_response(response, topic, difficulty)
+
+            quiz_data = self._normalize_quiz_data(quiz_data, topic, difficulty)
+
+            # Hard fallback if we still have no questions
+            if not quiz_data.get("questions"):
+                quiz_data = self._normalize_quiz_data({
+                    "topic": topic,
+                    "difficulty": difficulty,
+                    "questions": [
+                        {
+                            "question": f"Which statement best describes {topic}?",
+                            "options": [
+                                "It is a supervised learning concept",
+                                "It is an unsupervised learning concept",
+                                "It is only used for data visualization",
+                                "It is unrelated to machine learning",
+                            ],
+                            "correct": 0,
+                            "explanation": f"{topic} is commonly taught as part of supervised/ML fundamentals depending on context.",
+                        }
+                    ]
+                }, topic, difficulty)
 
             # Enhance with Hugging Face for question quality
             quiz_data = self._enhance_quiz_with_hf(quiz_data)
 
+            quiz_id = self._store_generated_quiz(quiz_data)
+
             return {
                 "success": True,
+                "quiz_id": quiz_id,
                 "quiz": quiz_data,
                 "generated_at": datetime.now().isoformat()
             }
@@ -84,17 +221,35 @@ class QuizSystem:
         current_question = None
         for line in lines:
             line = line.strip()
-            if line.startswith(('1.', '2.', '3.', '4.', '5.')) and '?' in line:
+
+            # Start of a new question
+            if (
+                (line[:2].isdigit() and line[1] in ['.', ')'])
+                or line.lower().startswith('q1')
+                or line.lower().startswith('q2')
+                or line.lower().startswith('q3')
+                or line.lower().startswith('q4')
+                or line.lower().startswith('q5')
+            ) and '?' in line:
                 if current_question:
                     questions.append(current_question)
                 current_question = {
-                    "question": line.split('.', 1)[1].strip(),
+                    "question": line.split('.', 1)[1].strip() if '.' in line else line,
                     "options": [],
                     "correct": "A",
                     "explanation": "Generated explanation"
                 }
             elif current_question and line.startswith(('A)', 'B)', 'C)', 'D)')):
                 current_question["options"].append(line)
+            elif current_question and line.lower().startswith('correct'):
+                # e.g. "Correct: B" or "Correct Answer: 2"
+                parts = line.split(':', 1)
+                if len(parts) == 2:
+                    current_question["correct"] = parts[1].strip()
+            elif current_question and line.lower().startswith('explanation'):
+                parts = line.split(':', 1)
+                if len(parts) == 2:
+                    current_question["explanation"] = parts[1].strip()
 
         if current_question:
             questions.append(current_question)
@@ -127,6 +282,8 @@ class QuizSystem:
         except Exception as e:
             # HF enhancement is optional, don't fail if it doesn't work
             pass
+
+        return quiz_data
 
     def analyze_quiz_performance(self, quiz_results: List[Dict], user_history: List[Dict] = None) -> Dict:
         """
@@ -383,30 +540,14 @@ class QuizSystem:
     def generate_quiz_for_topic(self, topic: str) -> Dict:
         """Generate a quiz for any topic using AI"""
         try:
-            gemini = get_groq()
-            prompt = f"""Create a 3-5 question multiple choice quiz for the topic: {topic}
+            result = self.generate_realtime_quiz(topic=topic, difficulty="Intermediate", num_questions=5)
 
-Format as JSON:
-{{
-    "topic": "{topic}",
-    "questions": [
-        {{
-            "question": "Question text here?",
-            "options": ["Option A", "Option B", "Option C", "Option D"],
-            "correct": 0,
-            "explanation": "Why this is correct"
-        }}
-    ]
-}}
+            if isinstance(result, dict) and result.get("success") and result.get("quiz"):
+                return result.get("quiz")
 
-Make questions progressive in difficulty, covering basic to advanced concepts."""
-
-            # Since Groq returns text, we'll parse it
-            response = gemini.generate_text_explanation(f"Create quiz for {topic}", "Intermediate")
-
-            # For now, return a simple generated quiz
             return {
                 "topic": topic,
+                "difficulty": "Intermediate",
                 "questions": [
                     {
                         "question": f"What is a key concept in {topic}?",
@@ -414,23 +555,12 @@ Make questions progressive in difficulty, covering basic to advanced concepts.""
                             "Basic understanding",
                             "Advanced implementation",
                             "Data preprocessing",
-                            "Model evaluation"
+                            "Model evaluation",
                         ],
                         "correct": 0,
-                        "explanation": f"This covers fundamental aspects of {topic}."
-                    },
-                    {
-                        "question": f"How do you evaluate performance in {topic}?",
-                        "options": [
-                            "Using accuracy only",
-                            "Using appropriate metrics for the task",
-                            "Ignoring validation",
-                            "Using random guessing"
-                        ],
-                        "correct": 1,
-                        "explanation": "Proper evaluation metrics are crucial for assessing model performance."
+                        "explanation": f"This covers fundamental aspects of {topic}.",
                     }
-                ]
+                ],
             }
         except Exception as e:
             print(f"Error generating quiz: {e}")

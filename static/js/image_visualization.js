@@ -19,6 +19,94 @@ const imageVisualizationModule = {
         if (downloadImageBtn) {
             downloadImageBtn.addEventListener('click', () => this.downloadImages());
         }
+
+        const nextTopicBtn = document.getElementById('nextTopicBtn');
+        if (nextTopicBtn) {
+            nextTopicBtn.addEventListener('click', () => this.goToNextTopic());
+        }
+    },
+
+    initTopicFromUrl: async function() {
+        const params = new URLSearchParams(window.location.search);
+        const topicId = params.get('topic');
+        this.currentTopicId = topicId;
+        this.pageStartTs = Date.now();
+
+        const nextTopicBtn = document.getElementById('nextTopicBtn');
+        if (nextTopicBtn) nextTopicBtn.style.display = topicId ? 'inline-block' : 'none';
+
+        if (!topicId) return;
+
+        try {
+            const resp = await fetch(`/api/topic/${encodeURIComponent(topicId)}`);
+            const data = await resp.json();
+            if (data.success && data.topic && data.topic.title) {
+                const input = document.getElementById('imageConcept');
+                if (input) input.value = data.topic.title;
+            }
+        } catch (e) {
+            // non-fatal
+        }
+    },
+
+    trackProgress: async function(modality) {
+        if (!this.currentTopicId) return;
+        const token = localStorage.getItem('auth_token');
+        const headers = token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+        const minutes = Math.max(0, Math.round((Date.now() - (this.pageStartTs || Date.now())) / 60000));
+
+        try {
+            const resp = await fetch('/api/update-progress', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    topic_id: this.currentTopicId,
+                    completed: true,
+                    time_spent: minutes,
+                    modality,
+                    event: 'generated'
+                })
+            });
+
+            try {
+                const data = await resp.json();
+                if (data && data.quiz_checkpoint && data.quiz_topic_id) {
+                    window.location.href = `/quiz/${encodeURIComponent(data.quiz_topic_id)}`;
+                }
+            } catch (e) {
+                // ignore
+            }
+        } catch (e) {
+            // non-fatal
+        }
+    },
+
+    goToNextTopic: async function() {
+        if (!this.currentTopicId) return;
+
+        try {
+            const resp = await fetch(`/api/topic-next/${encodeURIComponent(this.currentTopicId)}`);
+            const data = await resp.json();
+
+            if (!data.success || !data.has_next || !data.next_topic || !data.next_topic.topic) {
+                alert('No next topic available.');
+                return;
+            }
+
+            const nextTopic = data.next_topic.topic;
+            const contentType = nextTopic.content_type || 'text';
+            const routes = {
+                text: '/text-explanation',
+                code: '/code-generation',
+                audio: '/audio-learning',
+                image: '/image-visualization'
+            };
+
+            const route = routes[contentType] || '/text-explanation';
+            window.location.href = `${route}?topic=${encodeURIComponent(nextTopic.id)}`;
+        } catch (e) {
+            alert('Failed to load next topic.');
+        }
     },
     
     handleFormSubmit: async function(e) {
@@ -46,6 +134,7 @@ const imageVisualizationModule = {
         const outputSection = document.getElementById('imageOutputSection');
         const loadingIndicator = document.getElementById('imageLoadingIndicator');
         const gallery = document.getElementById('imageGallery');
+        const nextTopicBtn = document.getElementById('nextTopicBtn');
         
         generateBtn.disabled = true;
         outputSection.style.display = 'block';
@@ -73,9 +162,20 @@ const imageVisualizationModule = {
             
             if (data.success) {
                 loadingIndicator.style.display = 'none';
+                if (data.warning) {
+                    const warn = document.createElement('div');
+                    warn.style.background = '#fff3cd';
+                    warn.style.color = '#856404';
+                    warn.style.padding = '0.8rem';
+                    warn.style.borderRadius = '6px';
+                    warn.style.marginBottom = '1rem';
+                    warn.textContent = data.warning;
+                    gallery.parentElement.insertBefore(warn, gallery);
+                }
                 this.displayImage(data.image_url, diagramType, gallery);
                 this.generatedImages = [data];
                 await this.trackProgress('image');
+                if (nextTopicBtn && this.currentTopicId) nextTopicBtn.style.display = 'inline-block';
             } else {
                 throw new Error(data.error || 'Failed to generate image');
             }
@@ -93,6 +193,7 @@ const imageVisualizationModule = {
         const outputSection = document.getElementById('imageOutputSection');
         const loadingIndicator = document.getElementById('imageLoadingIndicator');
         const gallery = document.getElementById('imageGallery');
+        const nextTopicBtn = document.getElementById('nextTopicBtn');
         
         generateBtn.disabled = true;
         outputSection.style.display = 'block';
@@ -107,7 +208,9 @@ const imageVisualizationModule = {
                 },
                 body: JSON.stringify({
                     concept: concept,
-                    count: 3
+                    count: 3,
+                    diagram_type: diagramType,
+                    backend: backend
                 })
             });
             
@@ -125,6 +228,7 @@ const imageVisualizationModule = {
                     this.displayImage(img.image_url, img.diagram_type, gallery);
                 });
                 await this.trackProgress('image');
+                if (nextTopicBtn && this.currentTopicId) nextTopicBtn.style.display = 'inline-block';
             } else {
                 throw new Error(data.error || 'Failed to generate images');
             }
@@ -134,49 +238,6 @@ const imageVisualizationModule = {
             gallery.innerHTML = '<p style="color: red;">Error: ' + error.message + '</p>';
         } finally {
             generateBtn.disabled = false;
-        }
-    },
-
-    initTopicFromUrl: async function() {
-        const params = new URLSearchParams(window.location.search);
-        const topicId = params.get('topic');
-        this.currentTopicId = topicId;
-        this.pageStartTs = Date.now();
-
-        if (!topicId) return;
-
-        try {
-            const resp = await fetch(`/api/topic/${encodeURIComponent(topicId)}`);
-            const data = await resp.json();
-            if (data.success && data.topic && data.topic.title) {
-                const input = document.getElementById('imageConcept');
-                if (input) input.value = data.topic.title;
-            }
-        } catch (e) {
-            // non-fatal
-        }
-    },
-
-    trackProgress: async function(modality) {
-        if (!this.currentTopicId) return;
-        const token = localStorage.getItem('auth_token');
-        const headers = token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
-        const minutes = Math.max(0, Math.round((Date.now() - (this.pageStartTs || Date.now())) / 60000));
-
-        try {
-            await fetch('/api/update-progress', {
-                method: 'POST',
-                headers,
-                body: JSON.stringify({
-                    topic_id: this.currentTopicId,
-                    completed: true,
-                    time_spent: minutes,
-                    modality,
-                    event: 'generated'
-                })
-            });
-        } catch (e) {
-            // non-fatal
         }
     },
     

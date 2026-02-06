@@ -66,18 +66,35 @@ Format the response in clear, educational markdown."""
         Returns:
             Python code with comments and documentation
         """
-        prompt = f"""You are an expert Python developer. Generate a {complexity} Python implementation for the following:
+        # Determine code type based on algorithm topic
+        algorithm_lower = algorithm.lower()
+        
+        if any(keyword in algorithm_lower for keyword in ['neural network', 'cnn', 'rnn', 'lstm', 'transformer']):
+            code_type = "neural network implementation"
+        elif any(keyword in algorithm_lower for keyword in ['linear regression', 'logistic regression', 'svm', 'decision tree', 'random forest']):
+            code_type = "machine learning model implementation"
+        elif any(keyword in algorithm_lower for keyword in ['preprocessing', 'feature engineering', 'data cleaning']):
+            code_type = "data preprocessing pipeline"
+        elif any(keyword in algorithm_lower for keyword in ['clustering', 'pca', 'dimensionality']):
+            code_type = "unsupervised learning algorithm"
+        elif any(keyword in algorithm_lower for keyword in ['evaluation', 'metrics', 'validation']):
+            code_type = "model evaluation and metrics"
+        else:
+            code_type = "machine learning algorithm implementation"
+        
+        prompt = f"""You are an expert Python developer specializing in machine learning. Generate a complete, runnable Python code example for {code_type} of "{algorithm}".
 
-Algorithm/Concept: {algorithm}
+Requirements for {complexity} complexity:
+1. Include all necessary imports at the top
+2. Create a well-structured class or function with proper docstrings
+3. Add comprehensive inline comments explaining the code logic
+4. Include example usage with sample data
+5. Add error handling where appropriate
+6. Follow Python best practices and PEP 8 style
 
-Requirements:
-1. Include clear inline comments explaining each part
-2. Add docstrings for all functions
-3. Use best practices and proper error handling
-4. Include example usage at the bottom
-5. List all required dependencies as a comment at the top
+The code should be immediately executable and demonstrate the {algorithm} concept clearly.
 
-Format the response as complete, runnable Python code."""
+Format as complete Python code that can be copied and run."""
         
         try:
             message = self.client.chat.completions.create(

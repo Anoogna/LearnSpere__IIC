@@ -224,6 +224,8 @@ def get_topic_metadata(topic_id):
         for module in course_data.get('course', {}).get('modules', []):
             for topic in module.get('topics', []):
                 if topic.get('id') == topic_id:
+                    if not topic.get('content_type'):
+                        topic['content_type'] = 'text'
                     return jsonify({
                         'success': True,
                         'topic': topic,
@@ -235,6 +237,55 @@ def get_topic_metadata(topic_id):
                     })
 
         return jsonify({'success': False, 'error': 'Topic not found'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/topic-next/<topic_id>', methods=['GET'])
+def get_next_topic_by_id(topic_id):
+    """Get the next topic (in course order) after a given topic_id."""
+    try:
+        with open('data/course_structure.json', 'r') as f:
+            course_data = json.load(f)
+
+        ordered_topics = []
+        for module in course_data.get('course', {}).get('modules', []):
+            for topic in module.get('topics', []):
+                ordered_topics.append({
+                    'module': {
+                        'id': module.get('id'),
+                        'title': module.get('title'),
+                        'order': module.get('order'),
+                    },
+                    'topic': topic,
+                })
+
+        current_index = None
+        for idx, item in enumerate(ordered_topics):
+            if item.get('topic', {}).get('id') == topic_id:
+                current_index = idx
+                break
+
+        if current_index is None:
+            return jsonify({'success': False, 'error': 'Topic not found'}), 404
+
+        next_index = current_index + 1
+        if next_index >= len(ordered_topics):
+            return jsonify({'success': True, 'has_next': False, 'next_topic': None}), 200
+
+        # Ensure next topic has a content type so the frontend can route correctly
+        try:
+            next_item = ordered_topics[next_index]
+            if next_item.get('topic') and not next_item['topic'].get('content_type'):
+                next_item['topic']['content_type'] = 'text'
+        except Exception:
+            pass
+
+        return jsonify({
+            'success': True,
+            'has_next': True,
+            'next_topic': ordered_topics[next_index],
+        }), 200
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -291,15 +342,18 @@ def generate_code():
         
         gemini = get_groq()
         code = gemini.generate_code_example(algorithm, complexity)
-        
+
+        executor = get_code_executor()
+        code = executor.sanitize_code(code)
+
         # Detect dependencies
-        dependencies = get_code_executor().detect_dependencies(code)
-        
+        dependencies = executor.detect_dependencies(code)
+
         # Validate syntax
-        is_valid, error = get_code_executor().validate_syntax(code)
-        
+        is_valid, error = executor.validate_syntax(code)
+
         # Save code file
-        filepath, webpath = get_code_executor().save_code_file(code) or (None, None)
+        filepath, webpath = executor.save_code_file(code) or (None, None)
         
         return jsonify({
             'success': True,
@@ -436,15 +490,58 @@ def generate_image():
             return jsonify({'error': 'Concept is required'}), 400
         
         gemini = get_groq()
-        prompt = gemini.generate_image_prompt(concept, diagram_type)
-        
+
+        # Build a more controlled, topic-relevant prompt for Hugging Face image generation
+        dt_lower = str(diagram_type).lower()
+        if dt_lower == 'flowchart':
+            prompt = (
+                f"Educational flowchart diagram about: {concept}. "
+                f"Clean vector style, white background, clear labeled boxes and arrows, readable text. "
+                f"Show key steps and decision points."
+            )
+        elif dt_lower == 'technical':
+            prompt = (
+                f"Technical architecture diagram about: {concept}. "
+                f"Clean infographic / vector style, white background, labeled components and connections. "
+                f"Focus on structure and data flow."
+            )
+        else:
+            prompt = (
+                f"Educational concept diagram about: {concept}. "
+                f"Clean infographic / vector style, white background, labeled main parts."
+            )
+
+        # For placeholder diagrams, keep using the richer AI-generated prompt (helps detection)
+        if backend != 'stable_diffusion':
+            prompt = gemini.generate_image_prompt(concept, diagram_type)
+
         images = get_images()
-        result = images.generate_image_from_prompt(prompt, use_api=backend)
+
+        force_type = None
+        if str(diagram_type).lower() == 'flowchart':
+            force_type = 'flowchart'
+        elif str(diagram_type).lower() == 'technical':
+            force_type = 'architecture'
+
+        warning = None
+
+        result = images.generate_image_from_prompt(
+            prompt,
+            use_api=backend,
+            diagram_type=force_type,
+            variation=0,
+        )
         
         # If Stable Diffusion fails, fallback to placeholder
         if result is None and backend == 'stable_diffusion':
             print("[WARNING] Stable Diffusion failed, falling back to Smart Diagrams")
-            result = images.generate_image_from_prompt(prompt, use_api='placeholder')
+            warning = 'Hugging Face image generation failed; fell back to Smart Diagrams. Check HF_TOKEN / model availability.'
+            result = images.generate_image_from_prompt(
+                prompt,
+                use_api='placeholder',
+                diagram_type=force_type,
+                variation=0,
+            )
         
         if result and len(result) == 2:
             filepath, webpath = result
@@ -454,7 +551,8 @@ def generate_image():
                 'concept': concept,
                 'diagram_type': diagram_type,
                 'prompt': prompt,
-                'backend_used': 'placeholder' if backend == 'stable_diffusion' and result else backend,
+                'backend_used': 'placeholder' if backend == 'stable_diffusion' and warning else backend,
+                'warning': warning,
                 'generated_at': datetime.now().isoformat()
             })
         else:
@@ -470,6 +568,8 @@ def generate_images_multiple():
         data = request.get_json()
         concept = data.get('concept', '')
         count = min(int(data.get('count', 1)), 5)  # Max 5 images
+        diagram_type = data.get('diagram_type')
+        backend = data.get('backend', 'placeholder')
         
         if not concept:
             return jsonify({'error': 'Concept is required'}), 400
@@ -478,22 +578,33 @@ def generate_images_multiple():
         images_obj = get_images()
         
         generated_images = []
-        diagram_types = ['Conceptual', 'Technical', 'Flowchart']
+
+        force_type = None
+        if diagram_type:
+            dt_lower = str(diagram_type).lower()
+            if dt_lower == 'flowchart':
+                force_type = 'flowchart'
+            elif dt_lower == 'technical':
+                force_type = 'architecture'
         
         for i in range(count):
-            # Vary diagram type among available options
-            diagram_type = diagram_types[i % len(diagram_types)]
-            # Vary visual style with variation parameter (0-4)
             variation = i % 5
-            
-            prompt = gemini.generate_image_prompt(concept, diagram_type)
-            # Pass diagram_type to force specific type and variation for visual diversity
+
+            prompt = gemini.generate_image_prompt(concept, diagram_type or 'Conceptual')
             result = images_obj.generate_image_from_prompt(
                 prompt,
-                diagram_type=diagram_type,
+                diagram_type=force_type,
                 variation=variation,
-                use_api='placeholder'
+                use_api=backend
             )
+
+            if result is None and backend == 'stable_diffusion':
+                result = images_obj.generate_image_from_prompt(
+                    prompt,
+                    diagram_type=force_type,
+                    variation=variation,
+                    use_api='placeholder'
+                )
 
             # Skip if image generation failed
             if not result or len(result) != 2:
@@ -504,7 +615,7 @@ def generate_images_multiple():
             if filepath:
                 generated_images.append({
                     'image_url': webpath,
-                    'diagram_type': diagram_type,
+                    'diagram_type': diagram_type or 'Conceptual',
                     'variation': variation,
                     'prompt': prompt[:100] + '...' if len(prompt) > 100 else prompt
                 })
@@ -600,9 +711,10 @@ def generate_complete_lesson():
         code = gemini.generate_code_example(topic, complexity)
         script = gemini.generate_audio_script(topic, "Medium")
         image_prompt = gemini.generate_image_prompt(topic, "Technical")
-        
+
         # Process code
         executor = get_code_executor()
+        code = executor.sanitize_code(code)
         dependencies = executor.detect_dependencies(code)
         code_valid, code_error = executor.validate_syntax(code)
         code_file = executor.save_code_file(code)
@@ -665,6 +777,8 @@ def serve_uploads(filename):
             mimetype = 'image/png'
         elif filename.endswith('.jpg') or filename.endswith('.jpeg'):
             mimetype = 'image/jpeg'
+        elif filename.endswith('.svg'):
+            mimetype = 'image/svg+xml'
         elif filename.endswith('.mp3'):
             mimetype = 'audio/mpeg'
         else:
@@ -766,7 +880,25 @@ def update_progress():
             modality=modality,
             event=event,
         )
-        return jsonify({'success': True, 'progress': progress})
+
+        # Quiz checkpoint: when the user completes a topic, encourage a short quiz
+        # so we can adapt the next recommendation.
+        quiz_checkpoint = False
+        if completed:
+            try:
+                # Only prompt a checkpoint quiz if the user hasn't already passed
+                # a quiz for this topic.
+                user_progress = get_course_progress(username)
+                score = (user_progress.get('quiz_scores') or {}).get(topic_id)
+                quiz_checkpoint = not (score is not None and float(score) >= 70)
+            except Exception:
+                quiz_checkpoint = True
+        return jsonify({
+            'success': True,
+            'progress': progress,
+            'quiz_checkpoint': quiz_checkpoint,
+            'quiz_topic_id': topic_id if quiz_checkpoint else None,
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

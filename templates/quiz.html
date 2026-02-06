@@ -189,6 +189,7 @@
 // Quiz Module
 const quizModule = {
     currentTopic: '{{ topic }}',
+    quizId: null,
     quizData: null,
     currentQuestionIndex: 0,
     answers: [],
@@ -214,11 +215,27 @@ const quizModule = {
         loadingDiv.style.display = 'block';
 
         try {
-            const response = await fetch(`/api/get-quiz/${encodeURIComponent(this.currentTopic)}`);
+            const token = localStorage.getItem('auth_token');
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const response = await fetch('/api/quiz/generate', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    topic: this.currentTopic,
+                    difficulty: 'Beginner',
+                    num_questions: 5
+                })
+            });
+
             const data = await response.json();
 
-            if (data.success) {
+            if (data.success && data.quiz) {
                 this.quizData = data.quiz;
+                this.quizId = data.quiz_id || (data.quiz && data.quiz.quiz_id) || null;
                 this.answers = new Array(this.quizData.questions.length).fill(null);
                 this.renderQuiz();
                 loadingDiv.style.display = 'none';
@@ -251,7 +268,7 @@ const quizModule = {
                         <div class="option ${this.answers[this.currentQuestionIndex] === index ? 'selected' : ''}"
                              data-index="${index}"
                              onclick="quizModule.selectOption(${index})">
-                            ${option}
+                            ${String.fromCharCode(65 + index)}. ${option}
                         </div>
                     `).join('')}
                 </div>
@@ -304,21 +321,27 @@ const quizModule = {
         submitBtn.textContent = 'Submitting...';
 
         try {
-            const response = await fetch('/api/submit-quiz', {
+            const token = localStorage.getItem('auth_token');
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const response = await fetch('/api/quiz/submit', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers,
                 body: JSON.stringify({
+                    quiz_id: this.quizId || (this.quizData && this.quizData.quiz_id) || this.currentTopic,
                     topic: this.currentTopic,
-                    answers: this.answers
+                    answers: this.answers,
+                    time_taken: 0
                 })
             });
 
             const data = await response.json();
 
             if (data.success) {
-                this.results = data.results;
+                this.results = data;
                 this.showResults();
             } else {
                 throw new Error(data.error || 'Failed to submit quiz');
@@ -349,7 +372,7 @@ const quizModule = {
         `;
 
         // Show detailed results
-        this.results.results.forEach(result => {
+        (this.results.detailed_results || this.results.results || []).forEach(result => {
             summaryDiv.innerHTML += `
                 <div class="result-item ${result.is_correct ? 'correct' : 'incorrect'}">
                     <span>${result.question}</span>
@@ -368,7 +391,7 @@ const quizModule = {
         const teachingDiv = document.getElementById('errorTeaching');
         teachingDiv.style.display = 'block';
 
-        const incorrectQuestions = this.results.results.filter(r => !r.is_correct);
+        const incorrectQuestions = (this.results.detailed_results || this.results.results || []).filter(r => !r.is_correct);
 
         try {
             const response = await fetch('/api/error-teaching', {

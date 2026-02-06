@@ -41,5 +41,221 @@
         "explanation": "Decision trees are highly interpretable and can be visualized as a tree structure."
       }
     ]
+  },
+  "gen_79146ffd2b164070bd2485b9b7e13953": {
+    "topic": "neutral networks",
+    "difficulty": "Intermediate",
+    "questions": [
+      {
+        "question": "What is the primary function of an activation function in a neural network?",
+        "options": [
+          "To optimize the model's weights",
+          "To introduce non-linearity to the model",
+          "To improve the model's accuracy",
+          "To reduce the model's complexity"
+        ],
+        "correct": 1,
+        "explanation": "An activation function is used to introduce non-linearity to the model, allowing it to learn and represent more complex patterns in the data.",
+        "sentiment_score": 0.9880831837654114,
+        "qa_confidence": 0.6124781370162964
+      },
+      {
+        "question": "What is the purpose of a hidden layer in a neural network?",
+        "options": [
+          "To process the input data",
+          "To represent the output of the model",
+          "To introduce non-linearity to the model",
+          "To optimize the model's weights"
+        ],
+        "correct": 2,
+        "explanation": "A hidden layer is used to introduce non-linearity to the model, allowing it to learn and represent more complex patterns in the data.",
+        "sentiment_score": 0.9979189038276672,
+        "qa_confidence": 0.4734105169773102
+      },
+      {
+        "question": "What is the term for the process of training a neural network with a large dataset to improve its performance?",
+        "options": [
+          "Overfitting",
+          "Underfitting",
+          "Regularization",
+          "Data augmentation"
+        ],
+        "correct": 0,
+        "explanation": "The process of training a neural network with a large dataset to improve its performance is known as data augmentation.",
+        "sentiment_score": 0.9934890270233154,
+        "qa_confidence": 0.7653905155602843
+      },
+      {
+        "question": "What is the purpose of a bias term in a neural network?",
+        "options": [
+          "To introduce non-linearity to the model",
+          "To optimize the model's weights",
+          "To improve the model's accuracy",
+          "To shift the output of the model"
+        ],
+        "correct": 3,
+        "explanation": "A bias term is used to shift the output of the model, allowing it to adjust the output based on the input data.",
+        "sentiment_score": 0.9980758428573608,
+        "qa_confidence": 0.4693093001842499
+      },
+      {
+        "question": "What is the term for the phenomenon where a neural network becomes too complex and starts to perform poorly on new, unseen data?",
+        "options": [
+          "Regularization",
+          "Data augmentation",
+          "Overfitting",
+          "Underfitting"
+        ],
+        "correct": 2,
+        "explanation": "The phenomenon where a neural network becomes too complex and starts to perform poorly on new, unseen data is known as overfitting.",
+        "sentiment_score": 0.9998018145561218,
+        "qa_confidence": 0.6126684041810222
+      }
+    ],
+    "quiz_id": "gen_79146ffd2b164070bd2485b9b7e13953"
+  },
+  "gen_8ad2c5444fc2414181a620b56d0bdd17": {
+    "topic": "decision_trees",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is a Decision Tree in Machine Learning?",
+        "options": [
+          "A type of Neural Network",
+          "A graph-like model for classification",
+          "A type of clustering algorithm",
+          "A type of regression technique"
+        ],
+        "correct": 1,
+        "explanation": "A Decision Tree is a graph-like model used for classification and regression tasks. It represents a series of decisions that are made based on the input features.",
+        "sentiment_score": 0.9874792098999023,
+        "qa_confidence": 0.25385013222694397
+      },
+      {
+        "question": "What is the purpose of a decision node in a Decision Tree?",
+        "options": [
+          "To split the data into smaller subsets",
+          "To evaluate the model's performance",
+          "To choose the best feature to split on",
+          "To make a prediction"
+        ],
+        "correct": 2,
+        "explanation": "A decision node in a Decision Tree is responsible for choosing the best feature to split the data into smaller subsets based on the decision criterion.",
+        "sentiment_score": 0.9977128505706787,
+        "qa_confidence": 0.2868710458278656
+      },
+      {
+        "question": "What is the term for the process of selecting the best feature to split at each node?",
+        "options": [
+          "Feature Selection",
+          "Node Splitting",
+          "Decision Making",
+          "Feature Splitting"
+        ],
+        "correct": 2,
+        "explanation": "The term for the process of selecting the best feature to split at each node is called Node Splitting.",
+        "sentiment_score": 0.990747332572937,
+        "qa_confidence": 0.6307244896888733
+      },
+      {
+        "question": "What is the term for the leaf nodes in a Decision Tree?",
+        "options": [
+          "Decision Nodes",
+          "Root Nodes",
+          "Leaf Nodes",
+          "Branch Nodes"
+        ],
+        "correct": 2,
+        "explanation": "The term for the leaf nodes in a Decision Tree is called Leaf Nodes. These nodes contain the predicted output for a specific input.",
+        "sentiment_score": 0.99556964635849,
+        "qa_confidence": 0.3463367223739624
+      },
+      {
+        "question": "How does a Decision Tree handle missing values in the data?",
+        "options": [
+          "It ignores the missing values and continues with the remaining data",
+          "It replaces the missing values with a specific value (e.g., mean or median)",
+          "It stops the tree growth at the node with missing values",
+          "It skips the node with missing values and goes to the next node"
+        ],
+        "correct": 2,
+        "explanation": "A Decision Tree can handle missing values by stopping the tree growth at the node with missing values. This approach is known as 'missing on the left' or 'missing on the right'.",
+        "sentiment_score": 0.9996058344841003,
+        "qa_confidence": 0.3709560036659241
+      }
+    ],
+    "quiz_id": "gen_8ad2c5444fc2414181a620b56d0bdd17"
+  },
+  "gen_268e14bcb45a475cbffb0648de565ff9": {
+    "topic": "decision_trees",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is the primary purpose of a Decision Tree in Machine Learning?",
+        "options": [
+          "Feature Selection",
+          "Handling Missing Values",
+          "Classification and Regression",
+          "Data Scaling"
+        ],
+        "correct": 2,
+        "explanation": "Decision Trees are used for both classification and regression tasks, making them a versatile tool in Machine Learning.",
+        "sentiment_score": 0.9918917417526245,
+        "qa_confidence": 0.9703510335239116
+      },
+      {
+        "question": "Which of the following is a common technique used to prevent overfitting in Decision Trees?",
+        "options": [
+          "Pruning",
+          "Bagging",
+          "Boosting",
+          "Regularization"
+        ],
+        "correct": 0,
+        "explanation": "Pruning is a common technique used to prevent overfitting in Decision Trees by reducing the complexity of the tree.",
+        "sentiment_score": 0.9930031895637512,
+        "qa_confidence": 0.8931522860075347
+      },
+      {
+        "question": "What is the term for the process of creating multiple Decision Trees and combining their predictions?",
+        "options": [
+          "Ensemble Learning",
+          "Stacking",
+          "Random Forest",
+          "Gradient Boosting"
+        ],
+        "correct": 0,
+        "explanation": "Ensemble Learning is the process of creating multiple models and combining their predictions to improve overall performance.",
+        "sentiment_score": 0.9892439842224121,
+        "qa_confidence": 0.9284847667149734
+      },
+      {
+        "question": "In a Decision Tree, what does the 'leaf node' represent?",
+        "options": [
+          "A feature",
+          "A class label",
+          "A probability",
+          "A decision"
+        ],
+        "correct": 1,
+        "explanation": "A leaf node in a Decision Tree represents a class label or a predicted outcome.",
+        "sentiment_score": 0.9920505881309509,
+        "qa_confidence": 0.4112709164619446
+      },
+      {
+        "question": "What is the term for the process of splitting a dataset into subsets based on a feature?",
+        "options": [
+          "Feature Selection",
+          "Feature Engineering",
+          "Splitting",
+          "Decision Making"
+        ],
+        "correct": 2,
+        "explanation": "Splitting is the process of dividing a dataset into subsets based on a feature, which is a key step in building a Decision Tree.",
+        "sentiment_score": 0.9952183365821838,
+        "qa_confidence": 0.5049104690551758
+      }
+    ],
+    "quiz_id": "gen_268e14bcb45a475cbffb0648de565ff9"
   }
 }

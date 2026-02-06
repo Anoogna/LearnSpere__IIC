@@ -262,6 +262,28 @@ def get_next_topic(username: str) -> Optional[Dict]:
     if not course_structure:
         return None
 
+    # Adaptive rule: if the user failed the last quiz for the current topic,
+    # recommend revisiting that topic before moving forward.
+    try:
+        current_topic_id = user_progress.get("current_topic")
+        error_patterns = user_progress.get("error_patterns", {}) or {}
+        if current_topic_id and current_topic_id in error_patterns:
+            last_score = error_patterns.get(current_topic_id, {}).get("last_score")
+            if last_score is not None and float(last_score) < 70:
+                for module in course_structure["course"]["modules"]:
+                    for topic in module["topics"]:
+                        if topic.get("id") == current_topic_id:
+                            return {
+                                "topic": topic,
+                                "module": {
+                                    "id": module["id"],
+                                    "title": module["title"],
+                                },
+                                "reason": "review_failed_quiz",
+                            }
+    except Exception:
+        pass
+
     # Find the first incomplete topic in order
     for module in course_structure["course"]["modules"]:
         for topic in module["topics"]:

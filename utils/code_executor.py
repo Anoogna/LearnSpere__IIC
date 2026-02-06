@@ -18,6 +18,104 @@ class CodeExecutor:
         """
         self.output_dir = output_dir
         Path(output_dir).mkdir(parents=True, exist_ok=True)
+
+    def sanitize_code(self, code: str) -> str:
+        if not code:
+            return ""
+        code = code.replace('\r\n', '\n')
+        lines = code.split('\n')
+        out = []
+        in_fence = False
+        for line in lines:
+            stripped = line.strip()
+            if stripped.startswith('```'):
+                if not in_fence:
+                    in_fence = True
+                    continue
+                in_fence = False
+                continue
+            if in_fence:
+                out.append(line)
+            else:
+                out.append(line)
+        cleaned = "\n".join(out).strip().lstrip('\ufeff')
+
+        # Remove common leading non-code lines (markdown titles, bold headers, etc.)
+        cleaned_lines = cleaned.split('\n')
+        while cleaned_lines:
+            first = cleaned_lines[0].strip()
+            if not first:
+                cleaned_lines.pop(0)
+                continue
+            if first.startswith('#'):
+                cleaned_lines.pop(0)
+                continue
+            if (first.startswith('**') and first.endswith('**')) or (first.startswith('*') and first.endswith('*')):
+                cleaned_lines.pop(0)
+                continue
+            if first.lower() in ('python', 'python code', 'code'):
+                cleaned_lines.pop(0)
+                continue
+            break
+
+        # If there is still a prelude, start at the first likely Python statement
+        starters = (
+            'import ', 'from ', 'def ', 'class ', '@',
+            'if __name__', '"""', "'''", '#!',
+        )
+        start_idx = None
+        for i, ln in enumerate(cleaned_lines):
+            s = ln.lstrip()
+            if not s:
+                continue
+            if s.startswith(starters):
+                start_idx = i
+                break
+
+        if start_idx is not None and start_idx > 0:
+            cleaned_lines = cleaned_lines[start_idx:]
+
+        # Strip trailing non-code lines (common when the model appends explanations)
+        trailing_markers = (
+            '```',
+            '---',
+            '###',
+            '##',
+            '# ',
+            '**',
+            '*',
+        )
+        while cleaned_lines:
+            last = cleaned_lines[-1].strip()
+            if not last:
+                cleaned_lines.pop()
+                continue
+            if last.startswith(trailing_markers):
+                cleaned_lines.pop()
+                continue
+            if last.lower().startswith(('explanation', 'note', 'notes', 'output', 'example output', 'usage:')):
+                cleaned_lines.pop()
+                continue
+            break
+
+        # Best-effort: if there's still a SyntaxError due to trailing text, trim until parse works
+        # (only trims from the end to avoid removing actual code structure).
+        for _ in range(200):
+            candidate = "\n".join(cleaned_lines).strip()
+            if not candidate:
+                return ""
+            try:
+                ast.parse(candidate)
+                return candidate
+            except SyntaxError as e:
+                # If the error points inside the current text, trim from the end and retry.
+                if not cleaned_lines:
+                    return candidate
+                cleaned_lines.pop()
+            except Exception:
+                return candidate
+
+        return "\n".join(cleaned_lines).strip()
         
     def save_code_file(self, code: str, filename: Optional[str] = None) -> Optional[Tuple[str, str]]:
         """
@@ -29,6 +127,7 @@ class CodeExecutor:
             Tuple of (file_path, file_url) or None if error
         """
         try:
+            code = self.sanitize_code(code)
             if filename is None:
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 filename = f"code_generated_{timestamp}.py"
@@ -56,6 +155,7 @@ class CodeExecutor:
             Tuple of (is_valid, error_message)
         """
         try:
+            code = self.sanitize_code(code)
             ast.parse(code)
             return True, None
         except SyntaxError as e:
@@ -75,6 +175,7 @@ class CodeExecutor:
         dependencies = set()
         
         try:
+            code = self.sanitize_code(code)
             tree = ast.parse(code)
             
             # Find all imports

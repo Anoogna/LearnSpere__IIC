@@ -68,11 +68,12 @@
             </div>
         </div>
 
-        <!-- Course Modules -->
-        <div class="course-modules">
-            <h2>📚 Course Modules</h2>
-            <div class="modules-grid" id="modulesGrid">
-                <div class="loading-spinner">Loading course modules...</div>
+        <!-- Learning Roadmap -->
+        <div class="learning-roadmap">
+            <h2>�️ Your Learning Roadmap</h2>
+            <p>Visual progress through the complete ML curriculum</p>
+            <div class="roadmap-container" id="roadmapContainer">
+                <!-- Roadmap will be generated here -->
             </div>
         </div>
 
@@ -233,9 +234,152 @@
     text-align: center;
 }
 
-.modules-grid {
-    display: grid;
+.learning-roadmap {
+    margin-bottom: 3rem;
+}
+
+.learning-roadmap h2 {
+    color: white;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.learning-roadmap p {
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.roadmap-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.roadmap-path {
+    display: flex;
+    flex-direction: column;
     gap: 2rem;
+    position: relative;
+}
+
+.roadmap-path::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, #667eea, #764ba2);
+    transform: translateX(-50%);
+    border-radius: 2px;
+    z-index: 1;
+}
+
+.roadmap-module {
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.roadmap-module:nth-child(even) {
+    flex-direction: row-reverse;
+}
+
+.roadmap-module-content {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 2px solid #e0e0e0;
+    flex: 1;
+    margin: 0 2rem;
+    transition: all 0.3s ease;
+}
+
+.roadmap-module.completed .roadmap-module-content {
+    border-color: #28a745;
+    background: #d4edda;
+}
+
+.roadmap-module.in-progress .roadmap-module-content {
+    border-color: #ffc107;
+    background: #fff3cd;
+}
+
+.roadmap-module-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.roadmap-module h3 {
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+}
+
+.roadmap-module p {
+    color: #666;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.roadmap-topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.roadmap-topic {
+    background: #f8f9fa;
+    padding: 0.5rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: #666;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.roadmap-topic.completed {
+    background: #d4edda;
+    color: #155724;
+    border-color: #28a745;
+}
+
+.roadmap-topic.available {
+    background: #fff3cd;
+    color: #856404;
+    border-color: #ffc107;
+    cursor: pointer;
+}
+
+.roadmap-topic.available:hover {
+    background: #ffeaa7;
+}
+
+.roadmap-connector {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+    background: #667eea;
+    border: 4px solid white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.roadmap-module.completed .roadmap-connector {
+    background: #28a745;
+}
+
+.roadmap-module.in-progress .roadmap-connector {
+    background: #ffc107;
 }
 
 .module-card {
@@ -492,20 +636,30 @@ function updateProgressUI() {
     if (!courseProgress) return;
 
     // Update summary stats
-    document.getElementById('overallProgress').style.width = courseProgress.progress_percentage + '%';
-    document.getElementById('overallProgressText').textContent = courseProgress.progress_percentage + '% Complete';
-    document.getElementById('topicsCompleted').textContent = courseProgress.completed_topics;
-    document.getElementById('totalTopics').textContent = courseProgress.total_topics;
-    document.getElementById('modulesCompleted').textContent = courseProgress.completed_modules;
-    document.getElementById('totalModules').textContent = courseProgress.total_modules;
-    document.getElementById('timeSpent').textContent = formatTime(courseProgress.total_time_spent);
+    const overallProgressEl = document.getElementById('overallProgress');
+    const overallProgressTextEl = document.getElementById('overallProgressText');
+    const topicsCompletedEl = document.getElementById('topicsCompleted');
+    const totalTopicsEl = document.getElementById('totalTopics');
+    const modulesCompletedEl = document.getElementById('modulesCompleted');
+    const totalModulesEl = document.getElementById('totalModules');
+    const timeSpentEl = document.getElementById('timeSpent');
+
+    if (overallProgressEl) overallProgressEl.style.width = courseProgress.progress_percentage + '%';
+    if (overallProgressTextEl) overallProgressTextEl.textContent = courseProgress.progress_percentage + '% Complete';
+    if (topicsCompletedEl) topicsCompletedEl.textContent = courseProgress.completed_topics;
+    if (totalTopicsEl) totalTopicsEl.textContent = courseProgress.total_topics;
+    if (modulesCompletedEl) modulesCompletedEl.textContent = courseProgress.completed_modules;
+    if (totalModulesEl) totalModulesEl.textContent = courseProgress.total_modules;
+    if (timeSpentEl) timeSpentEl.textContent = formatTime(courseProgress.total_time_spent);
 
     // Update quiz stats
     const quizScores = courseProgress.quiz_scores || {};
     const quizCount = Object.keys(quizScores).length;
     const averageScore = quizCount > 0 ? Object.values(quizScores).reduce((a, b) => a + b, 0) / quizCount : 0;
-    document.getElementById('quizzesTaken').textContent = quizCount;
-    document.getElementById('quizAverage').textContent = 'Average: ' + Math.round(averageScore) + '%';
+    const quizzesTakenEl = document.getElementById('quizzesTaken');
+    const quizAverageEl = document.getElementById('quizAverage');
+    if (quizzesTakenEl) quizzesTakenEl.textContent = quizCount;
+    if (quizAverageEl) quizAverageEl.textContent = 'Average: ' + Math.round(averageScore) + '%';
 
     // Update next topic
     updateNextTopic();
@@ -555,7 +709,7 @@ function updateModules() {
         <div class="module-card">
             <div class="module-header">
                 <div class="module-title">
-                    <span>${getModuleIcon(module.id)}</span>
+                    <div class="module-icon">${getModuleIcon(module.id)}</div>
                     <h3>${module.title}</h3>
                 </div>
                 <div class="module-status ${getModuleStatus(module)}">
@@ -592,6 +746,40 @@ function updateModules() {
             </div>
         </div>
     `).join('');
+
+    // Generate roadmap after modules are loaded
+    generateRoadmap();
+}
+
+function generateRoadmap() {
+    const roadmapContainer = document.getElementById('roadmapContainer');
+    const modules = courseProgress.modules;
+
+    roadmapContainer.innerHTML = `
+        <div class="roadmap-path">
+            ${modules.map((module, index) => {
+                const moduleStatus = getModuleStatus(module);
+                const moduleIcon = getModuleIcon(module.id);
+                
+                return `
+                    <div class="roadmap-module ${moduleStatus}">
+                        <div class="roadmap-module-content">
+                            <div class="roadmap-module-icon">${moduleIcon}</div>
+                            <h3>${module.title}</h3>
+                            <p>${module.description || 'Master key concepts in this module'}</p>
+                            <div class="roadmap-topics">
+                                ${module.topics.map(topic => {
+                                    const topicStatus = getTopicStatus(topic);
+                                    return `<span class="roadmap-topic ${topicStatus}" ${topicStatus === 'available' ? `onclick="navigateToTopic('${topic.id}', '${topic.content_type}')"` : ''}>${topic.title}</span>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                        <div class="roadmap-connector"></div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
 }
 
 function getModuleIcon(moduleId) {

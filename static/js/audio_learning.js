@@ -24,6 +24,11 @@ const audioLearningModule = {
         if (copyTranscriptBtn) {
             copyTranscriptBtn.addEventListener('click', () => this.copyTranscript());
         }
+
+        const nextTopicBtn = document.getElementById('nextTopicBtn');
+        if (nextTopicBtn) {
+            nextTopicBtn.addEventListener('click', () => this.goToNextTopic());
+        }
     },
     
     handleFormSubmit: async function(e) {
@@ -46,6 +51,7 @@ const audioLearningModule = {
         const loadingIndicator = document.getElementById('audioLoadingIndicator');
         const audioSource = document.getElementById('audioSource');
         const transcriptContent = document.getElementById('transcriptContent');
+        const nextTopicBtn = document.getElementById('nextTopicBtn');
         
         generateBtn.disabled = true;
         outputSection.style.display = 'block';
@@ -83,6 +89,7 @@ const audioLearningModule = {
                 
                 this.loadRecentAudios();
                 await this.trackProgress('audio');
+                if (nextTopicBtn && this.currentTopicId) nextTopicBtn.style.display = 'inline-block';
             } else {
                 throw new Error(data.error || 'Failed to generate audio');
             }
@@ -101,6 +108,9 @@ const audioLearningModule = {
         this.currentTopicId = topicId;
         this.pageStartTs = Date.now();
 
+        const nextTopicBtn = document.getElementById('nextTopicBtn');
+        if (nextTopicBtn) nextTopicBtn.style.display = topicId ? 'inline-block' : 'none';
+
         if (!topicId) return;
 
         try {
@@ -115,6 +125,34 @@ const audioLearningModule = {
         }
     },
 
+    goToNextTopic: async function() {
+        if (!this.currentTopicId) return;
+
+        try {
+            const resp = await fetch(`/api/topic-next/${encodeURIComponent(this.currentTopicId)}`);
+            const data = await resp.json();
+
+            if (!data.success || !data.has_next || !data.next_topic || !data.next_topic.topic) {
+                alert('No next topic available.');
+                return;
+            }
+
+            const nextTopic = data.next_topic.topic;
+            const contentType = nextTopic.content_type || 'text';
+            const routes = {
+                text: '/text-explanation',
+                code: '/code-generation',
+                audio: '/audio-learning',
+                image: '/image-visualization'
+            };
+
+            const route = routes[contentType] || '/text-explanation';
+            window.location.href = `${route}?topic=${encodeURIComponent(nextTopic.id)}`;
+        } catch (e) {
+            alert('Failed to load next topic.');
+        }
+    },
+
     trackProgress: async function(modality) {
         if (!this.currentTopicId) return;
         const token = localStorage.getItem('auth_token');
@@ -122,7 +160,7 @@ const audioLearningModule = {
         const minutes = Math.max(0, Math.round((Date.now() - (this.pageStartTs || Date.now())) / 60000));
 
         try {
-            await fetch('/api/update-progress', {
+            const resp = await fetch('/api/update-progress', {
                 method: 'POST',
                 headers,
                 body: JSON.stringify({
@@ -133,6 +171,15 @@ const audioLearningModule = {
                     event: 'generated'
                 })
             });
+
+            try {
+                const data = await resp.json();
+                if (data && data.quiz_checkpoint && data.quiz_topic_id) {
+                    window.location.href = `/quiz/${encodeURIComponent(data.quiz_topic_id)}`;
+                }
+            } catch (e) {
+                // ignore
+            }
         } catch (e) {
             // non-fatal
         }

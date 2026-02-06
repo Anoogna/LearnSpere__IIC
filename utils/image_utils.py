@@ -11,6 +11,7 @@ import base64
 from io import BytesIO
 import requests
 import json
+import random
 
 try:
     from PIL import Image, ImageDraw, ImageFont
@@ -27,6 +28,10 @@ class ImageUtils:
         """
         self.output_dir = output_dir
         Path(output_dir).mkdir(parents=True, exist_ok=True)
+
+    def _unique_stamp(self) -> str:
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        return f"{ts}_{random.randint(1000, 9999)}"
         
     def generate_image_from_prompt(self, prompt: str, filename: Optional[str] = None,
                                   use_api: str = "placeholder", diagram_type: str = None,
@@ -51,6 +56,42 @@ class ImageUtils:
         except Exception as e:
             print(f"Error generating image: {str(e)}")
             return None
+
+    def _generate_svg_placeholder(self, prompt: str, filename: Optional[str] = None) -> Optional[Tuple[str, str]]:
+        try:
+            if filename is None:
+                filename = f"diagram_generated_{self._unique_stamp()}.svg"
+            if not filename.lower().endswith('.svg'):
+                filename = os.path.splitext(filename)[0] + '.svg'
+
+            filepath = os.path.join(self.output_dir, filename)
+            title = (prompt or "Concept Visualization").strip().replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            if len(title) > 80:
+                title = title[:77] + '...'
+
+            svg = f"""<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"900\" height=\"500\" viewBox=\"0 0 900 500\">
+  <rect x=\"0\" y=\"0\" width=\"900\" height=\"500\" fill=\"#ffffff\"/>
+  <rect x=\"40\" y=\"40\" width=\"820\" height=\"420\" rx=\"18\" fill=\"#f8f9fa\" stroke=\"#667eea\" stroke-width=\"3\"/>
+  <text x=\"450\" y=\"120\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"26\" fill=\"#333\">ML Concept Diagram</text>
+  <text x=\"450\" y=\"190\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"18\" fill=\"#555\">{title}</text>
+  <circle cx=\"250\" cy=\"320\" r=\"55\" fill=\"#667eea\" opacity=\"0.85\"/>
+  <circle cx=\"450\" cy=\"320\" r=\"55\" fill=\"#764ba2\" opacity=\"0.85\"/>
+  <circle cx=\"650\" cy=\"320\" r=\"55\" fill=\"#28a745\" opacity=\"0.85\"/>
+  <line x1=\"305\" y1=\"320\" x2=\"395\" y2=\"320\" stroke=\"#999\" stroke-width=\"3\"/>
+  <line x1=\"505\" y1=\"320\" x2=\"595\" y2=\"320\" stroke=\"#999\" stroke-width=\"3\"/>
+  <text x=\"250\" y=\"326\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"14\" fill=\"#fff\">Input</text>
+  <text x=\"450\" y=\"326\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"14\" fill=\"#fff\">Model</text>
+  <text x=\"650\" y=\"326\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"14\" fill=\"#fff\">Output</text>
+</svg>"""
+
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(svg)
+
+            web_path = filepath.replace('\\', '/')
+            return filepath, f"/{web_path}"
+        except Exception as e:
+            print(f"Error generating SVG diagram: {str(e)}")
+            return None
     
     def _generate_with_stable_diffusion(self, prompt: str, filename: Optional[str] = None) -> Optional[Tuple[str, str]]:
         """
@@ -68,18 +109,27 @@ class ImageUtils:
             
             api_url = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2"
             headers = {"Authorization": f"Bearer {hf_token}"}
-            payload = {"inputs": prompt}
+            payload = {
+                "inputs": prompt,
+                "parameters": {
+                    "guidance_scale": 7.5,
+                    "num_inference_steps": 30,
+                    "negative_prompt": "low quality, blurry, distorted text, watermark, logo, photorealistic face, extra limbs",
+                },
+                "options": {
+                    "wait_for_model": True
+                }
+            }
             
             print(f"[INFO] Calling Stable Diffusion API with prompt: {prompt[:50]}...")
-            response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+            response = requests.post(api_url, headers=headers, json=payload, timeout=60)
             
             if response.status_code == 200:
                 print("[SUCCESS] Stable Diffusion API returned 200 OK")
                 image_data = response.content
                 
                 if filename is None:
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    filename = f"diagram_diffusion_{timestamp}.png"
+                    filename = f"diagram_diffusion_{self._unique_stamp()}.png"
                 
                 filepath = os.path.join(self.output_dir, filename)
                 with open(filepath, 'wb') as f:
@@ -133,13 +183,12 @@ class ImageUtils:
             variation: Visual variation (0-4) for different styles of the same diagram type
         """
         if not PIL_AVAILABLE:
-            print("PIL not available for diagram generation")
-            return None
+            return self._generate_svg_placeholder(prompt, filename)
         
         try:
             if filename is None:
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"diagram_generated_{timestamp}.png"
+                type_tag = (force_type or "auto").lower().replace(' ', '_')
+                filename = f"diagram_generated_{type_tag}_v{int(variation)}_{self._unique_stamp()}.png"
             
             filepath = os.path.join(self.output_dir, filename)
             
@@ -548,7 +597,7 @@ class ImageUtils:
         try:
             for filename in os.listdir(self.output_dir):
                 filepath = os.path.join(self.output_dir, filename)
-                if os.path.isfile(filepath) and filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                if os.path.isfile(filepath) and filename.lower().endswith(('.png', '.jpg', '.jpeg', '.svg')):
                     images.append({
                         'filename': filename,
                         'path': f"/{filepath.replace(chr(92), '/')}",

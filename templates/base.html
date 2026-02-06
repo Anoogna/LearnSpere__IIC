@@ -18,9 +18,7 @@
                 </span>
                 <a href="{{ url_for('login') }}" class="btn-nav-secondary" id="loginBtn">Login</a>
                 <a href="{{ url_for('register') }}" class="btn-nav-primary" id="registerBtn">Sign Up</a>
-                <form method="POST" action="{{ url_for('logout') }}" style="display: inline;" id="logoutForm">
-                    <button type="submit" class="btn-nav-danger" id="logoutBtn" style="display: none;">Logout</button>
-                </form>
+                <button type="button" class="btn-nav-danger" id="logoutBtn" style="display: none;" onclick="authManager.logout()">Logout</button>
             </div>
         </div>
     </nav>
