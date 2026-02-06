@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Home - ML Learning Assistant{% endblock %}
+
+{% block content %}
+<div class="home-page">
+    <section class="hero">
+        <h1>Welcome to GyanGuru</h1>
+        <p>AI Powered Learning Assistant for Machine Learning & AI</p>
+        <p class="subtitle">Transform your learning with AI-powered content across all modalities</p>
+    </section>
+    
+    <section class="features">
+        <div class="feature-card">
+            <h3>📝 Text Explanations</h3>
+            <p>Get comprehensive explanations of any ML concept from basic to advanced levels</p>
+            <a href="/text-explanation" class="btn">Explore Text Lessons</a>
+        </div>
+        
+        <div class="feature-card">
+            <h3>💻 Code Generation</h3>
+            <p>Generate production-ready Python code with automatic dependency detection</p>
+            <a href="/code-generation" class="btn">Generate Code</a>
+        </div>
+        
+        <div class="feature-card">
+            <h3>🎵 Audio Learning</h3>
+            <p>Listen to engaging audio lessons while commuting or during breaks</p>
+            <a href="/audio-learning" class="btn">Listen to Lessons</a>
+        </div>
+        
+        <div class="feature-card">
+            <h3>🖼️ Visual Diagrams</h3>
+            <p>AI-generated visual diagrams and illustrations for better understanding</p>
+            <a href="/image-visualization" class="btn">View Diagrams</a>
+        </div>
+    </section>
+    
+    <section class="learning-path">
+        <h2>Start Your Learning Journey</h2>
+        <p>Choose your preferred learning style or combine multiple modalities for a comprehensive understanding</p>
+        <div class="path-buttons">
+            <a href="/text-explanation" class="path-btn text">Text First</a>
+            <a href="/code-generation" class="path-btn code">Code First</a>
+            <a href="/audio-learning" class="path-btn audio">Audio First</a>
+            <a href="/image-visualization" class="path-btn visual">Visual First</a>
+        </div>
+    </section>
+    
+    <section class="stats">
+        <div class="stat">
+            <h4>AI Model</h4>
+            <p>Google Gemini 2.0 Flash</p>
+        </div>
+        <div class="stat">
+            <h4>Learning Modalities</h4>
+            <p>4 Different Styles</p>
+        </div>
+        <div class="stat">
+            <h4>Topics</h4>
+            <p>Any ML Concept</p>
+        </div>
+        <div class="stat">
+            <h4>Quality</h4>
+            <p>Production Ready</p>
+        </div>
+    </section>
+</div>
+
+<style>
+.hero {
+    text-align: center;
+    padding: 3rem 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    margin-bottom: 3rem;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+.hero .subtitle {
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.feature-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.feature-card h3 {
+    color: #667eea;
+    margin-top: 0;
+}
+
+.learning-path {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 3rem;
+}
+
+.path-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.path-btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+}
+
+.path-btn.text { background-color: #3498db; }
+.path-btn.code { background-color: #e74c3c; }
+.path-btn.audio { background-color: #2ecc71; }
+.path-btn.visual { background-color: #f39c12; }
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.stat {
+    text-align: center;
+    padding: 1rem;
+}
+
+.stat h4 {
+    margin: 0;
+    color: #667eea;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    background-color: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 1rem;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #764ba2;
+}
+</style>
+{% endblock %}
