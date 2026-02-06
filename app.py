@@ -12,14 +12,14 @@ import json
 from werkzeug.utils import secure_filename
 
 # Import utility modules
-from utils.genai_utils import get_gemini, init_gemini
+from utils.genai_utils import get_groq, init_groq
 from utils.audio_utils import get_audio, init_audio
 from utils.image_utils import get_images, init_images
 from utils.code_executor import get_code_executor, init_code_executor
 
 # Load environment variables
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
@@ -36,7 +36,7 @@ os.makedirs('uploads/images', exist_ok=True)
 os.makedirs('uploads/code', exist_ok=True)
 
 # Initialize utility modules
-init_gemini(os.getenv('GOOGLE_API_KEY'))
+init_groq("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")
 init_audio()
 init_images()
 init_code_executor()
@@ -95,7 +95,7 @@ def generate_explanation():
         if not topic:
             return jsonify({'error': 'Topic is required'}), 400
         
-        gemini = get_gemini()
+        gemini = get_groq()
         explanation = gemini.generate_text_explanation(topic, complexity)
         
         return jsonify({
@@ -123,7 +123,7 @@ def generate_code():
         if not algorithm:
             return jsonify({'error': 'Algorithm is required'}), 400
         
-        gemini = get_gemini()
+        gemini = get_groq()
         code = gemini.generate_code_example(algorithm, complexity)
         
         # Detect dependencies
@@ -222,7 +222,7 @@ def generate_audio_script():
         if not topic:
             return jsonify({'error': 'Topic is required'}), 400
         
-        gemini = get_gemini()
+        gemini = get_groq()
         script = gemini.generate_audio_script(topic, length)
         
         # Generate audio from script
@@ -256,7 +256,7 @@ def generate_image():
         if not concept:
             return jsonify({'error': 'Concept is required'}), 400
         
-        gemini = get_gemini()
+        gemini = get_groq()
         prompt = gemini.generate_image_prompt(concept, diagram_type)
         
         images = get_images()
@@ -287,7 +287,7 @@ def generate_images_multiple():
         if not concept:
             return jsonify({'error': 'Concept is required'}), 400
         
-        gemini = get_gemini()
+        gemini = get_groq()
         images_obj = get_images()
         
         generated_images = []
@@ -386,7 +386,7 @@ def generate_complete_lesson():
         if not topic:
             return jsonify({'error': 'Topic is required'}), 400
         
-        gemini = get_gemini()
+        gemini = get_groq()
         
         # Generate all content types
         explanation = gemini.generate_text_explanation(topic, complexity)

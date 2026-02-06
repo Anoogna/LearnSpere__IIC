@@ -1,20 +1,18 @@
 """
-Google Gemini AI Integration Module
-Handles text and image generation using Google's Gemini API
+Groq AI Integration Module
+Handles text generation using Groq API
 """
 
-import google.generativeai as genai
+from groq import Groq
 import os
 from typing import Optional, List
 import json
 
-class GeminiAIUtils:
+class GroqAIUtils:
     def __init__(self, api_key: Optional[str] = None):
-        """Initialize Gemini AI with API key"""
-        self.api_key = api_key or os.getenv('GOOGLE_API_KEY')
-        genai.configure(api_key=self.api_key)
-        self.text_model = genai.GenerativeModel('models/gemini-pro')
-        self.image_model = genai.GenerativeModel('models/gemini-pro')
+        """Initialize Groq AI with API key"""
+        self.api_key = api_key or os.getenv('GROQ_API_KEY')
+        self.client = Groq(api_key=self.api_key)
         
     def generate_text_explanation(self, topic: str, complexity_level: str = "Intermediate") -> str:
         """
@@ -41,8 +39,14 @@ Please provide:
 Format the response in clear, educational markdown."""
         
         try:
-            response = self.text_model.generate_content(prompt)
-            return response.text
+            response = self.client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[
+                    {"role": "system", "content": "You are an expert ML educator."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            return response.choices[0].message.content
         except Exception as e:
             return f"Error generating explanation: {str(e)}"
     
@@ -69,8 +73,14 @@ Requirements:
 Format the response as complete, runnable Python code."""
         
         try:
-            response = self.text_model.generate_content(prompt)
-            return response.text
+            response = self.client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[
+                    {"role": "system", "content": "You are an expert Python developer."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            return response.choices[0].message.content
         except Exception as e:
             return f"Error generating code: {str(e)}"
     
@@ -98,8 +108,14 @@ Create a conversational, engaging script that:
 Write in a conversational tone as if explaining to a student during office hours."""
         
         try:
-            response = self.text_model.generate_content(prompt)
-            return response.text
+            response = self.client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[
+                    {"role": "system", "content": "You are an engaging ML educator creating audio lesson scripts."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            return response.choices[0].message.content
         except Exception as e:
             return f"Error generating audio script: {str(e)}"
     
@@ -128,8 +144,14 @@ The prompt should be detailed and specific for an image generation model, includ
 Provide a single, comprehensive prompt suitable for image generation AI."""
         
         try:
-            response = self.text_model.generate_content(prompt)
-            return response.text
+            response = self.client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[
+                    {"role": "system", "content": "You are an expert at creating detailed prompts for educational diagram generation."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            return response.choices[0].message.content
         except Exception as e:
             return f"Error generating image prompt: {str(e)}"
     
@@ -179,17 +201,13 @@ Provide a single, comprehensive prompt suitable for image generation AI."""
             return []
 
 # Create global instance
-gemini_utils = None
+groq_utils = None
 
-def init_gemini(api_key: Optional[str] = None):
-    """Initialize the Gemini utility module"""
-    global gemini_utils
-    gemini_utils = GeminiAIUtils(api_key)
-    return gemini_utils
+def init_groq(api_key: Optional[str] = None):
+    """Initialize the Groq utility module"""
+    global groq_utils
+    groq_utils = GroqAIUtils(api_key)
 
-def get_gemini():
-    """Get the Gemini utility instance"""
-    global gemini_utils
-    if gemini_utils is None:
-        gemini_utils = GeminiAIUtils()
-    return gemini_utils
+def get_groq():
+    """Get the global Groq utility instance"""
+    return groq_utils
