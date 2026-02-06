@@ -1,0 +1,25 @@
+{
+  "user_progress": {
+    "Gunjari_Anoogna": {
+      "username": "Gunjari_Anoogna",
+      "started_at": "2026-02-06T17:50:39.551269",
+      "modules_completed": [],
+      "topics_completed": [],
+      "current_module": null,
+      "current_topic": null,
+      "total_time_spent": 0,
+      "last_activity": "2026-02-06T17:50:39.551269"
+    },
+    "Anoogna": {
+      "username": "Anoogna",
+      "started_at": "2026-02-06T17:56:57.531556",
+      "modules_completed": [],
+      "topics_completed": [],
+      "quiz_scores": {},
+      "current_module": null,
+      "current_topic": null,
+      "total_time_spent": 0,
+      "last_activity": "2026-02-06T17:56:57.531556"
+    }
+  }
+}

@@ -4,6 +4,7 @@
 const textExplanationModule = {
     init: function() {
         console.log('Text explanation module initialized');
+        this.initTopicFromUrl();
         this.attachEventListeners();
     },
     
@@ -75,8 +76,9 @@ const textExplanationModule = {
             if (data.success) {
                 loadingIndicator.style.display = 'none';
                 explanationContent.style.display = 'block';
-                explanationContent.textContent = data.explanation;
+                explanationContent.innerHTML = this.formatText(data.explanation);
                 this.currentExplanation = data.explanation;
+                await this.trackProgress('text');
             } else {
                 throw new Error(data.error || 'Failed to generate explanation');
             }
@@ -87,6 +89,51 @@ const textExplanationModule = {
             explanationContent.textContent = 'Error: ' + error.message;
         } finally {
             generateBtn.disabled = false;
+        }
+    },
+
+    initTopicFromUrl: async function() {
+        const params = new URLSearchParams(window.location.search);
+        const topicId = params.get('topic');
+        this.currentTopicId = topicId;
+        this.pageStartTs = Date.now();
+
+        if (!topicId) return;
+
+        try {
+            const resp = await fetch(`/api/topic/${encodeURIComponent(topicId)}`);
+            const data = await resp.json();
+            if (data.success && data.topic && data.topic.title) {
+                const topicInput = document.getElementById('topic');
+                if (topicInput) topicInput.value = data.topic.title;
+            }
+        } catch (e) {
+            // non-fatal
+        }
+    },
+
+    trackProgress: async function(modality) {
+        if (!this.currentTopicId) return;
+        const token = localStorage.getItem('auth_token');
+        const headers = token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+
+        // Best-effort time spent since page load, in minutes (int)
+        const minutes = Math.max(0, Math.round((Date.now() - (this.pageStartTs || Date.now())) / 60000));
+
+        try {
+            await fetch('/api/update-progress', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    topic_id: this.currentTopicId,
+                    completed: true,
+                    time_spent: minutes,
+                    modality,
+                    event: 'generated'
+                })
+            });
+        } catch (e) {
+            // non-fatal
         }
     },
     
@@ -136,7 +183,7 @@ const textExplanationModule = {
                 body: JSON.stringify({
                     text: this.currentExplanation,
                     topic: topic,
-                    type: 'tts'
+                    audio_type: 'tts'
                 })
             });
             
@@ -155,7 +202,40 @@ const textExplanationModule = {
         }
     },
     
-    currentExplanation: null
+    formatText: function(text) {
+        // Basic text formatting
+        let formatted = text
+            // Convert line breaks to paragraphs
+            .split('\n\n')
+            .map(paragraph => {
+                if (paragraph.trim()) {
+                    // Format bold text (assuming **text** or *text* format)
+                    paragraph = paragraph.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    paragraph = paragraph.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                    
+                    // Convert single line breaks to <br> within paragraphs
+                    paragraph = paragraph.replace(/\n/g, '<br>');
+                    
+                    return '<p>' + paragraph + '</p>';
+                }
+                return '';
+            })
+            .join('');
+        
+        // Handle headings (assuming # Heading format)
+        formatted = formatted.replace(/^<p># (.*?)<\/p>$/gm, '<h3>$1</h3>');
+        formatted = formatted.replace(/^<p>## (.*?)<\/p>$/gm, '<h4>$1</h4>');
+        
+        // Handle lists (assuming - item format)
+        formatted = formatted.replace(/<p>- (.*?)<\/p>/g, '<li>$1</li>');
+        formatted = formatted.replace(/(<li>.*?<\/li>)+/g, '<ul>$&</ul>');
+        
+        return formatted;
+    },
+    
+    currentExplanation: null,
+    currentTopicId: null,
+    pageStartTs: null
 };
 
 // Initialize when DOM is ready

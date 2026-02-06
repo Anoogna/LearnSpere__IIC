@@ -5,10 +5,10 @@ Handles text-to-speech conversion and audio file management
 
 import os
 import re
-from gtts import gTTS
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Tuple
+import pyttsx3
 
 class AudioUtils:
     def __init__(self, output_dir: str = "uploads/audio"):
@@ -38,7 +38,7 @@ class AudioUtils:
     def generate_audio(self, text: str, language: str = "en",
                       slow: bool = False) -> Optional[Tuple[str, str]]:
         """
-        Convert text to speech using gTTS
+        Convert text to speech using pyttsx3
         Args:
             text: Text to convert to audio
             language: Language code (default: 'en' for English)
@@ -56,9 +56,12 @@ class AudioUtils:
             filename = f"audio_{filename_text}_{timestamp}.mp3"
             filepath = os.path.join(self.output_dir, filename)
 
-            # Generate audio
-            tts = gTTS(text=processed_text, lang=language, slow=slow)
-            tts.save(filepath)
+            # Generate audio using pyttsx3
+            engine = pyttsx3.init()
+            engine.setProperty('rate', 150 if not slow else 120)  # Speed
+            engine.setProperty('volume', 0.9)  # Volume
+            engine.save_to_file(processed_text, filepath)
+            engine.runAndWait()
 
             # Return relative path for web access
             web_path = filepath.replace('\\', '/')
@@ -129,8 +132,13 @@ class AudioUtils:
             filename = f"lesson_{topic_sanitized}_{timestamp}.mp3"
             filepath = os.path.join(self.output_dir, filename)
 
-            tts = gTTS(text=clean_script, lang='en', slow=(speed < 1.0))
-            tts.save(filepath)
+            # Generate audio using pyttsx3
+            engine = pyttsx3.init()
+            rate = int(180 * speed)  # Adjust speed
+            engine.setProperty('rate', rate)
+            engine.setProperty('volume', 0.9)
+            engine.save_to_file(clean_script, filepath)
+            engine.runAndWait()
 
             web_path = filepath.replace('\\', '/')
             return filepath, f"/{web_path}"

@@ -4,7 +4,23 @@
     "email": "anoognagunjari@gmail.com",
     "password_hash": "pbkdf2:sha256:600000$nbnC4jarPNj2MAlw$cad723c313c9682204447ab0e902b9263c7f4fb7a5299940ee7cbaaa90328c2c",
     "created_at": "2026-02-06T14:38:22.028406",
-    "last_login": "2026-02-06T14:38:39.153561",
+    "last_login": "2026-02-06T20:27:55.433489",
+    "is_active": true
+  },
+  "testuser": {
+    "username": "testuser",
+    "email": "test@example.com",
+    "password_hash": "pbkdf2:sha256:600000$OHgJXjLTwfFYIGcL$0d170ac173b76c3d7e5ba550c45b2ab8a5fd0d62488e3fb518452a5840f6ca97",
+    "created_at": "2026-02-06T21:08:37.103740",
+    "last_login": "2026-02-06T21:08:50.807621",
+    "is_active": true
+  },
+  "testuser2": {
+    "username": "testuser2",
+    "email": "test2@example.com",
+    "password_hash": "pbkdf2:sha256:600000$aG6cvICV4WKJeiJh$feb2ae94b48bc671570553d27ca552bfe732a65bd4b4584fc9a67a20fe97e3ef",
+    "created_at": "2026-02-06T21:10:30.363953",
+    "last_login": "2026-02-06T21:10:33.315391",
     "is_active": true
   }
 }

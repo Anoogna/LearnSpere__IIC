@@ -4,6 +4,7 @@
 const audioLearningModule = {
     init: function() {
         console.log('Audio learning module initialized');
+        this.initTopicFromUrl();
         this.attachEventListeners();
         this.loadRecentAudios();
     },
@@ -81,6 +82,7 @@ const audioLearningModule = {
                 }
                 
                 this.loadRecentAudios();
+                await this.trackProgress('audio');
             } else {
                 throw new Error(data.error || 'Failed to generate audio');
             }
@@ -90,6 +92,49 @@ const audioLearningModule = {
             transcriptContent.textContent = 'Error: ' + error.message;
         } finally {
             generateBtn.disabled = false;
+        }
+    },
+
+    initTopicFromUrl: async function() {
+        const params = new URLSearchParams(window.location.search);
+        const topicId = params.get('topic');
+        this.currentTopicId = topicId;
+        this.pageStartTs = Date.now();
+
+        if (!topicId) return;
+
+        try {
+            const resp = await fetch(`/api/topic/${encodeURIComponent(topicId)}`);
+            const data = await resp.json();
+            if (data.success && data.topic && data.topic.title) {
+                const input = document.getElementById('audioTopic');
+                if (input) input.value = data.topic.title;
+            }
+        } catch (e) {
+            // non-fatal
+        }
+    },
+
+    trackProgress: async function(modality) {
+        if (!this.currentTopicId) return;
+        const token = localStorage.getItem('auth_token');
+        const headers = token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+        const minutes = Math.max(0, Math.round((Date.now() - (this.pageStartTs || Date.now())) / 60000));
+
+        try {
+            await fetch('/api/update-progress', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    topic_id: this.currentTopicId,
+                    completed: true,
+                    time_spent: minutes,
+                    modality,
+                    event: 'generated'
+                })
+            });
+        } catch (e) {
+            // non-fatal
         }
     },
     
@@ -152,7 +197,9 @@ const audioLearningModule = {
         }
     },
     
-    currentScript: null
+    currentScript: null,
+    currentTopicId: null,
+    pageStartTs: null
 };
 
 // Initialize when DOM is ready

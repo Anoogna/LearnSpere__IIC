@@ -62,12 +62,40 @@ def token_required(f):
     return decorated
 
 def require_login(f):
-    """Decorator to require login (stored in session)"""
+    """
+    Decorator to require login.
+    
+    Supports either:
+    - Session-based auth (session['username'])
+    - JWT-based auth (Authorization: Bearer <token> header or auth_token cookie)
+    """
     @wraps(f)
     def decorated(*args, **kwargs):
-        if 'username' not in session:
-            return jsonify({'error': 'Login required'}), 401
-        request.username = session['username']
-        return f(*args, **kwargs)
+        # Prefer session if present
+        if 'username' in session and session.get('username'):
+            request.username = session['username']
+            return f(*args, **kwargs)
+
+        # Fallback to JWT in headers/cookies (to support SPA/localStorage usage)
+        token = None
+
+        if 'Authorization' in request.headers:
+            auth_header = request.headers.get('Authorization', '')
+            parts = auth_header.split(' ')
+            if len(parts) == 2 and parts[0].lower() == 'bearer':
+                token = parts[1]
+
+        if not token and 'auth_token' in request.cookies:
+            token = request.cookies.get('auth_token')
+
+        if token:
+            username = verify_token(token)
+            if username:
+                request.username = username
+                # Optional: populate session for subsequent requests
+                session['username'] = username
+                return f(*args, **kwargs)
+
+        return jsonify({'error': 'Login required'}), 401
     
     return decorated

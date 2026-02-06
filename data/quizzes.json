@@ -1,0 +1,45 @@
+{
+  "linear_regression": {
+    "topic": "Linear Regression",
+    "questions": [
+      {
+        "question": "What is the main goal of linear regression?",
+        "options": [
+          "To classify data into categories",
+          "To predict a continuous output variable",
+          "To find clusters in data",
+          "To reduce dimensionality"
+        ],
+        "correct": 1,
+        "explanation": "Linear regression is used to predict continuous numerical values based on input features."
+      },
+      {
+        "question": "What does the slope (coefficient) represent in a simple linear regression equation y = mx + b?",
+        "options": [
+          "The intercept with y-axis",
+          "The rate of change between x and y",
+          "The error term",
+          "The correlation coefficient"
+        ],
+        "correct": 1,
+        "explanation": "The slope (m) represents how much y changes for each unit change in x."
+      }
+    ]
+  },
+  "decision_trees": {
+    "topic": "Decision Trees",
+    "questions": [
+      {
+        "question": "What is the primary advantage of decision trees?",
+        "options": [
+          "They always provide the most accurate predictions",
+          "They are easy to interpret and visualize",
+          "They require minimal data preprocessing",
+          "They work best with continuous data"
+        ],
+        "correct": 1,
+        "explanation": "Decision trees are highly interpretable and can be visualized as a tree structure."
+      }
+    ]
+  }
+}

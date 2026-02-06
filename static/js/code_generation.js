@@ -4,6 +4,7 @@
 const codeGenerationModule = {
     init: function() {
         console.log('Code generation module initialized');
+        this.initTopicFromUrl();
         this.attachEventListeners();
     },
     
@@ -85,6 +86,7 @@ const codeGenerationModule = {
                 codeContent.textContent = data.code;
                 this.currentCode = data.code;
                 this.currentDependencies = data.dependencies;
+                await this.trackProgress('code');
                 
                 // Display dependencies
                 dependenciesList.innerHTML = '';
@@ -119,6 +121,49 @@ const codeGenerationModule = {
             codeContent.textContent = 'Error: ' + error.message;
         } finally {
             generateBtn.disabled = false;
+        }
+    },
+
+    initTopicFromUrl: async function() {
+        const params = new URLSearchParams(window.location.search);
+        const topicId = params.get('topic');
+        this.currentTopicId = topicId;
+        this.pageStartTs = Date.now();
+
+        if (!topicId) return;
+
+        try {
+            const resp = await fetch(`/api/topic/${encodeURIComponent(topicId)}`);
+            const data = await resp.json();
+            if (data.success && data.topic && data.topic.title) {
+                const algoInput = document.getElementById('algorithm');
+                if (algoInput) algoInput.value = data.topic.title;
+            }
+        } catch (e) {
+            // non-fatal
+        }
+    },
+
+    trackProgress: async function(modality) {
+        if (!this.currentTopicId) return;
+        const token = localStorage.getItem('auth_token');
+        const headers = token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+        const minutes = Math.max(0, Math.round((Date.now() - (this.pageStartTs || Date.now())) / 60000));
+
+        try {
+            await fetch('/api/update-progress', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    topic_id: this.currentTopicId,
+                    completed: true,
+                    time_spent: minutes,
+                    modality,
+                    event: 'generated'
+                })
+            });
+        } catch (e) {
+            // non-fatal
         }
     },
     
@@ -218,7 +263,9 @@ const codeGenerationModule = {
     },
     
     currentCode: null,
-    currentDependencies: []
+    currentDependencies: [],
+    currentTopicId: null,
+    pageStartTs: null
 };
 
 // Initialize when DOM is ready

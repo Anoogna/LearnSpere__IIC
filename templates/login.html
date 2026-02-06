@@ -186,8 +186,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         if (response.ok) {
             showSuccess('Login successful! Redirecting...');
             localStorage.setItem('auth_token', data.token);
+            // Store username in sessionStorage for auth manager
+            sessionStorage.setItem('username', data.username);
             setTimeout(() => {
-                window.location.href = '{{ url_for("index") }}';
+                window.location.replace('/');
             }, 1500);
         } else {
             showError(data.error || 'Login failed');
