@@ -4,6 +4,7 @@ Handles text-to-speech conversion and audio file management
 """
 
 import os
+import re
 from gtts import gTTS
 from datetime import datetime
 from pathlib import Path
@@ -18,6 +19,21 @@ class AudioUtils:
         """
         self.output_dir = output_dir
         Path(output_dir).mkdir(parents=True, exist_ok=True)
+    
+    def _sanitize_filename(self, text: str, max_length: int = 30) -> str:
+        """
+        Sanitize text for use as a filename
+        Removes special characters and invalid path characters
+        """
+        # Remove special characters, keep only alphanumeric and underscore
+        sanitized = re.sub(r'[^\w\s-]', '', text[:max_length])
+        # Replace spaces with underscores
+        sanitized = re.sub(r'\s+', '_', sanitized)
+        # Remove multiple underscores
+        sanitized = re.sub(r'_+', '_', sanitized)
+        # Remove leading/trailing underscores
+        sanitized = sanitized.strip('_')
+        return sanitized if sanitized else "audio"
         
     def generate_audio(self, text: str, language: str = "en", 
                       slow: bool = False) -> Optional[Tuple[str, str]]:
@@ -32,7 +48,7 @@ class AudioUtils:
         """
         try:
             # Clean text for file naming
-            filename_text = text[:30].replace(' ', '_').replace('\n', '')
+            filename_text = self._sanitize_filename(text)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"audio_{filename_text}_{timestamp}.mp3"
             filepath = os.path.join(self.output_dir, filename)
@@ -68,7 +84,8 @@ class AudioUtils:
                 clean_script = clean_script[:5000] + "..."
             
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"lesson_{topic.replace(' ', '_')}_{timestamp}.mp3"
+            topic_sanitized = self._sanitize_filename(topic)
+            filename = f"lesson_{topic_sanitized}_{timestamp}.mp3"
             filepath = os.path.join(self.output_dir, filename)
             
             tts = gTTS(text=clean_script, lang='en', slow=(speed < 1.0))

@@ -1,20 +1,24 @@
 """
-Google Gemini AI Integration Module
-Handles text and image generation using Google's Gemini API
+Groq AI Integration Module
+Handles text and image generation using Groq's API
 """
 
-import google.generativeai as genai
+from groq import Groq
 import os
 from typing import Optional, List
 import json
 
-class GeminiAIUtils:
+class GroqAIUtils:
     def __init__(self, api_key: Optional[str] = None):
-        """Initialize Gemini AI with API key"""
-        self.api_key = api_key or os.getenv('GOOGLE_API_KEY')
-        genai.configure(api_key=self.api_key)
-        self.text_model = genai.GenerativeModel('models/gemini-pro')
-        self.image_model = genai.GenerativeModel('models/gemini-pro')
+        """Initialize Groq AI with API key"""
+        self.api_key = api_key or os.getenv('GROQ_API_KEY')
+        
+        # Set the environment variable for Groq SDK
+        if self.api_key:
+            os.environ['GROQ_API_KEY'] = self.api_key
+        
+        self.client = Groq(api_key=self.api_key)
+        self.model = "llama-3.1-8b-instant"  # Fast & stable model (recommended for hackathon)
         
     def generate_text_explanation(self, topic: str, complexity_level: str = "Intermediate") -> str:
         """
@@ -41,8 +45,15 @@ Please provide:
 Format the response in clear, educational markdown."""
         
         try:
-            response = self.text_model.generate_content(prompt)
-            return response.text
+            message = self.client.chat.completions.create(
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                model=self.model,
+                temperature=0.7,
+                max_tokens=2000,
+            )
+            return message.choices[0].message.content
         except Exception as e:
             return f"Error generating explanation: {str(e)}"
     
@@ -69,8 +80,15 @@ Requirements:
 Format the response as complete, runnable Python code."""
         
         try:
-            response = self.text_model.generate_content(prompt)
-            return response.text
+            message = self.client.chat.completions.create(
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                model=self.model,
+                temperature=0.5,
+                max_tokens=2000,
+            )
+            return message.choices[0].message.content
         except Exception as e:
             return f"Error generating code: {str(e)}"
     
@@ -92,14 +110,21 @@ Create a conversational, engaging script that:
 1. Starts with a hook/interesting question
 2. Explains the concept clearly WITHOUT jargon overload
 3. Includes one or two practical examples
-4. Has natural transitions and pauses markers [PAUSE]
+4. Has natural transitions and pauses marked with [PAUSE]
 5. Ends with key takeaways and next steps
 
 Write in a conversational tone as if explaining to a student during office hours."""
         
         try:
-            response = self.text_model.generate_content(prompt)
-            return response.text
+            message = self.client.chat.completions.create(
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                model=self.model,
+                temperature=0.7,
+                max_tokens=1500,
+            )
+            return message.choices[0].message.content
         except Exception as e:
             return f"Error generating audio script: {str(e)}"
     
@@ -128,8 +153,15 @@ The prompt should be detailed and specific for an image generation model, includ
 Provide a single, comprehensive prompt suitable for image generation AI."""
         
         try:
-            response = self.text_model.generate_content(prompt)
-            return response.text
+            message = self.client.chat.completions.create(
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                model=self.model,
+                temperature=0.6,
+                max_tokens=800,
+            )
+            return message.choices[0].message.content
         except Exception as e:
             return f"Error generating image prompt: {str(e)}"
     
@@ -179,17 +211,23 @@ Provide a single, comprehensive prompt suitable for image generation AI."""
             return []
 
 # Create global instance
-gemini_utils = None
+groq_utils = None
 
-def init_gemini(api_key: Optional[str] = None):
-    """Initialize the Gemini utility module"""
-    global gemini_utils
-    gemini_utils = GeminiAIUtils(api_key)
-    return gemini_utils
+def init_groq(api_key: Optional[str] = None):
+    """Initialize the Groq utility module"""
+    global groq_utils
+    groq_utils = GroqAIUtils(api_key)
+    return groq_utils
 
-def get_gemini():
-    """Get the Gemini utility instance"""
-    global gemini_utils
-    if gemini_utils is None:
-        gemini_utils = GeminiAIUtils()
-    return gemini_utils
+def get_groq():
+    """Get the Groq utility instance"""
+    global groq_utils
+    if groq_utils is None:
+        groq_utils = GroqAIUtils()
+    return groq_utils
+
+# Keep backward compatibility
+GeminiAIUtils = GroqAIUtils
+gemini_utils = groq_utils
+init_gemini = init_groq
+get_gemini = get_groq

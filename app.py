@@ -12,7 +12,7 @@ import json
 from werkzeug.utils import secure_filename
 
 # Import utility modules
-from utils.genai_utils import get_gemini, init_gemini
+from utils.genai_utils import get_groq, init_groq
 from utils.audio_utils import get_audio, init_audio
 from utils.image_utils import get_images, init_images
 from utils.code_executor import get_code_executor, init_code_executor
@@ -36,7 +36,7 @@ os.makedirs('uploads/images', exist_ok=True)
 os.makedirs('uploads/code', exist_ok=True)
 
 # Initialize utility modules
-init_gemini(os.getenv('GOOGLE_API_KEY'))
+init_groq(os.getenv('GROQ_API_KEY'))
 init_audio()
 init_images()
 init_code_executor()
@@ -87,16 +87,25 @@ def about():
 @app.route('/api/generate-explanation', methods=['POST'])
 def generate_explanation():
     """Generate text explanation for ML topic"""
+    print("🔥 API HIT: /api/generate-explanation")
     try:
         data = request.get_json()
+        print(f"📨 Received data: {data}")
         topic = data.get('topic', '')
         complexity = data.get('complexity', 'Intermediate')
+        
+        print(f"📝 Topic: {topic}, Complexity: {complexity}")
         
         if not topic:
             return jsonify({'error': 'Topic is required'}), 400
         
-        gemini = get_gemini()
+        print("🤖 Initializing Groq...")
+        gemini = get_groq()
+        print("✅ Groq initialized")
+        
+        print("⏳ Generating explanation...")
         explanation = gemini.generate_text_explanation(topic, complexity)
+        print(f"✨ Explanation generated: {explanation[:100]}...")
         
         return jsonify({
             'success': True,
@@ -106,6 +115,9 @@ def generate_explanation():
             'generated_at': datetime.now().isoformat()
         })
     except Exception as e:
+        print(f"❌ ERROR: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 # ============================================
@@ -123,7 +135,7 @@ def generate_code():
         if not algorithm:
             return jsonify({'error': 'Algorithm is required'}), 400
         
-        gemini = get_gemini()
+        gemini = get_groq()
         code = gemini.generate_code_example(algorithm, complexity)
         
         # Detect dependencies
@@ -222,7 +234,7 @@ def generate_audio_script():
         if not topic:
             return jsonify({'error': 'Topic is required'}), 400
         
-        gemini = get_gemini()
+        gemini = get_groq()
         script = gemini.generate_audio_script(topic, length)
         
         # Generate audio from script
@@ -256,7 +268,7 @@ def generate_image():
         if not concept:
             return jsonify({'error': 'Concept is required'}), 400
         
-        gemini = get_gemini()
+        gemini = get_groq()
         prompt = gemini.generate_image_prompt(concept, diagram_type)
         
         images = get_images()
@@ -287,7 +299,7 @@ def generate_images_multiple():
         if not concept:
             return jsonify({'error': 'Concept is required'}), 400
         
-        gemini = get_gemini()
+        gemini = get_groq()
         images_obj = get_images()
         
         generated_images = []
@@ -386,7 +398,7 @@ def generate_complete_lesson():
         if not topic:
             return jsonify({'error': 'Topic is required'}), 400
         
-        gemini = get_gemini()
+        gemini = get_groq()
         
         # Generate all content types
         explanation = gemini.generate_text_explanation(topic, complexity)
@@ -430,6 +442,42 @@ def generate_complete_lesson():
             'generated_at': datetime.now().isoformat()
         })
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# ============================================
+# FILE SERVING
+# ============================================
+
+@app.route('/uploads/<path:filename>')
+def serve_uploads(filename):
+    """Serve files from the uploads directory"""
+    try:
+        filepath = os.path.join('uploads', filename)
+        # Convert to absolute path for checking
+        abs_filepath = os.path.abspath(filepath)
+        abs_uploads = os.path.abspath('uploads')
+        
+        # Security check: ensure the file is within uploads directory
+        if not abs_filepath.startswith(abs_uploads):
+            return jsonify({'error': 'Access denied'}), 403
+        
+        if not os.path.exists(filepath):
+            print(f"❌ File not found: {filepath} (absolute: {abs_filepath})")
+            return jsonify({'error': f'File not found: {filepath}'}), 404
+        
+        # Determine mimetype based on file extension
+        if filename.endswith('.png'):
+            mimetype = 'image/png'
+        elif filename.endswith('.jpg') or filename.endswith('.jpeg'):
+            mimetype = 'image/jpeg'
+        elif filename.endswith('.mp3'):
+            mimetype = 'audio/mpeg'
+        else:
+            mimetype = 'application/octet-stream'
+        
+        return send_file(filepath, mimetype=mimetype)
+    except Exception as e:
+        print(f"❌ Error serving file: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 # ============================================
