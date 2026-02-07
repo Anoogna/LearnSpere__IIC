@@ -23,20 +23,31 @@ class GroqAIUtils:
         Returns:
             Structured explanation text
         """
-        prompt = f"""You are an expert ML educator. Generate a comprehensive explanation for the following topic.
+        prompt = f"""You are an expert ML educator. Provide a comprehensive explanation of the following topic: {topic}.
 
-Topic: {topic}
-Complexity Level: {complexity_level}
+Your response should be structured in markdown format with clear headings and sections.
 
-Please provide:
+Cover the following aspects:
+
+- Basic definition and intuition
+- Key concepts and terminology
+- Mathematical foundations (if applicable)
+- Practical applications
+- Common pitfalls and best practices
+
+Keep the explanation educational, clear, and engaging. Use simple language and avoid jargon where possible.
+
+IMPORTANT: Provide ONLY text explanation. Absolutely NO code, NO code snippets, NO code examples, NO programming code at all. Even if the topic involves algorithms or programming concepts, explain them in plain text without writing any code. Focus purely on explanatory prose.
+
+Include these sections (use headings):
 1. Brief Overview (2-3 sentences)
 2. Key Concepts (bullet points)
-3. Mathematical Foundation (if applicable)
-4. Practical Examples
-5. Common Misconceptions
-6. Resources for Further Learning
-
-Format the response in clear, educational markdown."""
+3. Intuition (plain-language explanation)
+4. Mathematical Foundation (only if applicable; keep concise)
+5. Practical Examples (real-world use-cases; not full code)
+6. Common Misconceptions
+7. Resources for Further Learning
+"""
         
         try:
             response = self.client.chat.completions.create(
@@ -59,18 +70,35 @@ Format the response in clear, educational markdown."""
         Returns:
             Python code with comments and documentation
         """
-        prompt = f"""You are an expert Python developer. Generate a {complexity} Python implementation for the following:
+        # Determine code type based on algorithm topic
+        algorithm_lower = algorithm.lower()
+        
+        if any(keyword in algorithm_lower for keyword in ['neural network', 'cnn', 'rnn', 'lstm', 'transformer']):
+            code_type = "neural network implementation"
+        elif any(keyword in algorithm_lower for keyword in ['linear regression', 'logistic regression', 'svm', 'decision tree', 'random forest']):
+            code_type = "machine learning model implementation"
+        elif any(keyword in algorithm_lower for keyword in ['preprocessing', 'feature engineering', 'data cleaning']):
+            code_type = "data preprocessing pipeline"
+        elif any(keyword in algorithm_lower for keyword in ['clustering', 'pca', 'dimensionality']):
+            code_type = "unsupervised learning algorithm"
+        elif any(keyword in algorithm_lower for keyword in ['evaluation', 'metrics', 'validation']):
+            code_type = "model evaluation and metrics"
+        else:
+            code_type = "machine learning algorithm implementation"
+        
+        prompt = f"""You are an expert Python developer specializing in machine learning. Generate a complete, runnable Python code example for {code_type} of "{algorithm}".
 
-Algorithm/Concept: {algorithm}
+Requirements for {complexity} complexity:
+1. Include all necessary imports at the top
+2. Create a well-structured class or function with proper docstrings
+3. Add comprehensive inline comments explaining the code logic
+4. Include example usage with sample data
+5. Add error handling where appropriate
+6. Follow Python best practices and PEP 8 style
 
-Requirements:
-1. Include clear inline comments explaining each part
-2. Add docstrings for all functions
-3. Use best practices and proper error handling
-4. Include example usage at the bottom
-5. List all required dependencies as a comment at the top
+The code should be immediately executable and demonstrate the {algorithm} concept clearly.
 
-Format the response as complete, runnable Python code."""
+Format as complete Python code that can be copied and run."""
         
         try:
             response = self.client.chat.completions.create(

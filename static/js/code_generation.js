@@ -2,8 +2,14 @@
 // Handles Python code generation for ML algorithms
 
 const codeGenerationModule = {
+    // Initialize variables
+    currentCode: null,
+    currentDependencies: [],
+    currentTopicId: null,
+    pageStartTs: null,
     init: function() {
         console.log('Code generation module initialized');
+        this.initTopicFromUrl();
         this.attachEventListeners();
     },
     
@@ -32,6 +38,11 @@ const codeGenerationModule = {
         if (colonabBtn) {
             colonabBtn.addEventListener('click', () => this.openInColab());
         }
+
+        const nextTopicBtn = document.getElementById('nextTopicBtn');
+        if (nextTopicBtn) {
+            nextTopicBtn.addEventListener('click', () => this.goToNextTopic());
+        }
     },
     
     handleFormSubmit: async function(e) {
@@ -55,6 +66,7 @@ const codeGenerationModule = {
         const codeContent = document.getElementById('codeContent');
         const codeTitle = document.getElementById('codeTitle');
         const dependenciesList = document.getElementById('dependenciesList');
+        const nextTopicBtn = document.getElementById('nextTopicBtn');
         
         generateBtn.disabled = true;
         outputSection.style.display = 'block';
@@ -85,6 +97,7 @@ const codeGenerationModule = {
                 codeContent.textContent = data.code;
                 this.currentCode = data.code;
                 this.currentDependencies = data.dependencies;
+                // Removed auto-progress tracking
                 
                 // Display dependencies
                 dependenciesList.innerHTML = '';
@@ -110,6 +123,9 @@ const codeGenerationModule = {
                     errorMsg.textContent = 'Warning: ' + data.error;
                     codeContent.parentElement.insertBefore(errorMsg, codeContent);
                 }
+
+                // Show "Mark as Complete" button instead of automatically showing next topic
+                this.showMarkCompleteButton();
             } else {
                 throw new Error(data.error || 'Failed to generate code');
             }
@@ -121,7 +137,117 @@ const codeGenerationModule = {
             generateBtn.disabled = false;
         }
     },
+
+    initTopicFromUrl: async function() {
+        const params = new URLSearchParams(window.location.search);
+        const topicId = params.get('topic');
+        this.currentTopicId = topicId;
+        this.pageStartTs = Date.now();
+
+        const nextTopicBtn = document.getElementById('nextTopicBtn');
+        if (nextTopicBtn) nextTopicBtn.style.display = topicId ? 'inline-block' : 'none';
+
+        if (!topicId) return;
+
+        try {
+            const resp = await fetch(`/api/topic/${encodeURIComponent(topicId)}`);
+            const data = await resp.json();
+            if (data.success && data.topic && data.topic.title) {
+                const algoInput = document.getElementById('algorithm');
+                if (algoInput) algoInput.value = data.topic.title;
+            }
+        } catch (e) {
+            // non-fatal
+        }
+    },
+
+    goToNextTopic: async function() {
+        if (!this.currentTopicId) return;
+
+        try {
+            const resp = await fetch(`/api/topic-next/${encodeURIComponent(this.currentTopicId)}`);
+            const data = await resp.json();
+
+            if (!data.success || !data.has_next || !data.next_topic || !data.next_topic.topic) {
+                alert('No next topic available.');
+                return;
+            }
+
+            const nextTopic = data.next_topic.topic;
+            const contentType = nextTopic.content_type || 'text';
+            const routes = {
+                text: '/text-explanation',
+                code: '/code-generation',
+                audio: '/audio-learning',
+                image: '/image-visualization'
+            };
+
+            const route = routes[contentType] || '/text-explanation';
+            window.location.href = `${route}?topic=${encodeURIComponent(nextTopic.id)}`;
+        } catch (e) {
+            alert('Failed to load next topic.');
+        }
+    },
+
+    trackProgress: async function(modality) {
+        if (!this.currentTopicId) return;
+        const token = localStorage.getItem('auth_token');
+        const headers = token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+        const minutes = Math.max(0, Math.round((Date.now() - (this.pageStartTs || Date.now())) / 60000));
+
+        try {
+            const resp = await fetch('/api/update-progress', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    topic_id: this.currentTopicId,
+                    completed: true,
+                    time_spent: minutes,
+                    modality,
+                    event: 'generated'
+                })
+            });
+
+            try {
+                const data = await resp.json();
+                // Removed auto-navigation to quiz
+            } catch (e) {
+                // ignore
+            }
+        } catch (e) {
+            // non-fatal
+        }
+    },
     
+    showMarkCompleteButton: function() {
+        const outputSection = document.getElementById('outputSection');
+        let markCompleteBtn = document.getElementById('markCompleteBtn');
+        if (!markCompleteBtn) {
+            markCompleteBtn = document.createElement('button');
+            markCompleteBtn.id = 'markCompleteBtn';
+            markCompleteBtn.textContent = 'Mark as Complete';
+            markCompleteBtn.className = 'btn-primary';
+            markCompleteBtn.onclick = () => this.markAsComplete();
+            outputSection.appendChild(markCompleteBtn);
+        }
+        markCompleteBtn.style.display = 'inline-block';
+    },
+
+    markAsComplete: async function() {
+        if (!this.currentTopicId) return;
+        
+        try {
+            await this.trackProgress('code');
+            // Hide the mark complete button and show next topic button
+            document.getElementById('markCompleteBtn').style.display = 'none';
+            const nextTopicBtn = document.getElementById('nextTopicBtn');
+            if (nextTopicBtn) nextTopicBtn.style.display = 'inline-block';
+        } catch (error) {
+            console.error('Error marking as complete:', error);
+            alert('Error updating progress. Please try again.');
+        }
+    },
+
     copyCode: function() {
         if (!this.currentCode) {
             alert('No code to copy');
@@ -218,7 +344,9 @@ const codeGenerationModule = {
     },
     
     currentCode: null,
-    currentDependencies: []
+    currentDependencies: [],
+    currentTopicId: null,
+    pageStartTs: null
 };
 
 // Initialize when DOM is ready

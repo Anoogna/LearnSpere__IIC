@@ -6,7 +6,7 @@ Handles creation of educational diagrams and visual content
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Dict
 import base64
 from io import BytesIO
 import requests
@@ -27,6 +27,10 @@ class ImageUtils:
         """
         self.output_dir = output_dir
         Path(output_dir).mkdir(parents=True, exist_ok=True)
+
+    def _unique_stamp(self) -> str:
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        return f"{ts}_{random.randint(1000, 9999)}"
         
     def generate_image_from_prompt(self, prompt: str, filename: Optional[str] = None,
                                   diagram_type: str = "Conceptual", use_api: str = "gemini",
@@ -977,7 +981,7 @@ class ImageUtils:
         try:
             for filename in os.listdir(self.output_dir):
                 filepath = os.path.join(self.output_dir, filename)
-                if os.path.isfile(filepath) and filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                if os.path.isfile(filepath) and filename.lower().endswith(('.png', '.jpg', '.jpeg', '.svg')):
                     images.append({
                         'filename': filename,
                         'path': f"/uploads/images/{filename}",

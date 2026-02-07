@@ -4,6 +4,7 @@
 const textExplanationModule = {
     init: function() {
         console.log('Text explanation module initialized');
+        this.initTopicFromUrl();
         this.attachEventListeners();
     },
     
@@ -27,6 +28,11 @@ const textExplanationModule = {
         if (generateAudioBtn) {
             generateAudioBtn.addEventListener('click', () => this.generateAudio());
         }
+
+        const nextTopicBtn = document.getElementById('nextTopicBtn');
+        if (nextTopicBtn) {
+            nextTopicBtn.addEventListener('click', () => this.goToNextTopic());
+        }
     },
     
     handleFormSubmit: async function(e) {
@@ -48,6 +54,7 @@ const textExplanationModule = {
         const outputSection = document.getElementById('outputSection');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const explanationContent = document.getElementById('explanationContent');
+        const nextTopicBtn = document.getElementById('nextTopicBtn');
         
         generateBtn.disabled = true;
         outputSection.style.display = 'block';
@@ -55,15 +62,47 @@ const textExplanationModule = {
         explanationContent.style.display = 'none';
         
         try {
-            const response = await fetch('/api/generate-explanation', {
+            // Get the current topic's content type from the module
+            let generationType = 'text'; // Default to text explanation
+            if (this.currentTopicId) {
+                try {
+                    const resp = await fetch(`/api/topic/${encodeURIComponent(this.currentTopicId)}`);
+                    const data = await resp.json();
+                    if (data.success && data.topic && data.topic.content_type) {
+                        generationType = data.topic.content_type;
+                    }
+                } catch (e) {
+                    console.warn('Could not fetch topic details, using default type', e);
+                }
+            }
+            
+            let apiEndpoint, requestBody;
+            
+            if (generationType === 'code') {
+                apiEndpoint = '/api/generate-code';
+                requestBody = {
+                    algorithm: topic,
+                    complexity: complexity
+                };
+            } else if (generationType === 'image') {
+                apiEndpoint = '/api/generate-image';
+                requestBody = {
+                    concept: topic
+                };
+            } else {
+                apiEndpoint = '/api/generate-explanation';
+                requestBody = {
+                    topic: topic,
+                    complexity: complexity
+                };
+            }
+            
+            const response = await fetch(apiEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    topic: topic,
-                    complexity: complexity
-                })
+                body: JSON.stringify(requestBody)
             });
             
             if (!response.ok) {
@@ -75,10 +114,22 @@ const textExplanationModule = {
             if (data.success) {
                 loadingIndicator.style.display = 'none';
                 explanationContent.style.display = 'block';
-                explanationContent.textContent = data.explanation;
-                this.currentExplanation = data.explanation;
+                
+                if (generationType === 'code') {
+                    explanationContent.innerHTML = `<h3>Generated Code</h3><pre><code>${data.code}</code></pre>`;
+                    this.currentExplanation = data.code;
+                } else if (generationType === 'image') {
+                    explanationContent.innerHTML = `<h3>Generated Image Prompt</h3><p>${data.prompt}</p>`;
+                    this.currentExplanation = data.prompt;
+                } else {
+                    explanationContent.innerHTML = this.formatText(data.explanation || data.text || data);
+                    this.currentExplanation = data.explanation || data.text || data;
+                }
+                
+                // Show "Mark as Complete" button instead of automatically tracking progress
+                this.showMarkCompleteButton();
             } else {
-                throw new Error(data.error || 'Failed to generate explanation');
+                throw new Error(data.error || 'Failed to generate content');
             }
         } catch (error) {
             console.error('Error:', error);
@@ -89,7 +140,119 @@ const textExplanationModule = {
             generateBtn.disabled = false;
         }
     },
+
+    initTopicFromUrl: async function() {
+        const params = new URLSearchParams(window.location.search);
+        const topicId = params.get('topic');
+        this.currentTopicId = topicId;
+        this.pageStartTs = Date.now();
+
+        const nextTopicBtn = document.getElementById('nextTopicBtn');
+        if (nextTopicBtn) nextTopicBtn.style.display = topicId ? 'inline-block' : 'none';
+
+        if (!topicId) return;
+
+        try {
+            const resp = await fetch(`/api/topic/${encodeURIComponent(topicId)}`);
+            const data = await resp.json();
+            if (data.success && data.topic && data.topic.title) {
+                const topicInput = document.getElementById('topic');
+                if (topicInput) topicInput.value = data.topic.title;
+            }
+        } catch (e) {
+            // non-fatal
+        }
+    },
+
+    goToNextTopic: async function() {
+        if (!this.currentTopicId) return;
+
+        try {
+            const resp = await fetch(`/api/topic-next/${encodeURIComponent(this.currentTopicId)}`);
+            const data = await resp.json();
+
+            if (!data.success || !data.has_next || !data.next_topic || !data.next_topic.topic) {
+                alert('No next topic available.');
+                return;
+            }
+
+            const nextTopic = data.next_topic.topic;
+            const contentType = nextTopic.content_type || 'text';
+            const routes = {
+                text: '/text-explanation',
+                code: '/code-generation',
+                audio: '/audio-learning',
+                image: '/image-visualization'
+            };
+
+            const route = routes[contentType] || '/text-explanation';
+            window.location.href = `${route}?topic=${encodeURIComponent(nextTopic.id)}`;
+        } catch (e) {
+            alert('Failed to load next topic.');
+        }
+    },
+
+    trackProgress: async function(modality) {
+        if (!this.currentTopicId) return;
+        const token = localStorage.getItem('auth_token');
+        const headers = token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+
+        // Best-effort time spent since page load, in minutes (int)
+        const minutes = Math.max(0, Math.round((Date.now() - (this.pageStartTs || Date.now())) / 60000));
+
+        try {
+            const resp = await fetch('/api/update-progress', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                    topic_id: this.currentTopicId,
+                    completed: true,
+                    time_spent: minutes,
+                    modality,
+                    event: 'generated'
+                })
+            });
+
+            try {
+                const data = await resp.json();
+                // Removed auto-navigation to quiz
+            } catch (e) {
+                // ignore
+            }
+        } catch (e) {
+            // non-fatal
+        }
+    },
     
+    showMarkCompleteButton: function() {
+        const outputSection = document.getElementById('outputSection');
+        let markCompleteBtn = document.getElementById('markCompleteBtn');
+        if (!markCompleteBtn) {
+            markCompleteBtn = document.createElement('button');
+            markCompleteBtn.id = 'markCompleteBtn';
+            markCompleteBtn.textContent = 'Mark as Complete';
+            markCompleteBtn.className = 'btn-primary';
+            markCompleteBtn.onclick = () => this.markAsComplete();
+            outputSection.appendChild(markCompleteBtn);
+        }
+        markCompleteBtn.style.display = 'inline-block';
+    },
+
+    markAsComplete: async function() {
+        if (!this.currentTopicId) return;
+        
+        try {
+            await this.trackProgress('text');
+            // Hide the mark complete button and show next topic button
+            document.getElementById('markCompleteBtn').style.display = 'none';
+            const nextTopicBtn = document.getElementById('nextTopicBtn');
+            if (nextTopicBtn) nextTopicBtn.style.display = 'inline-block';
+        } catch (error) {
+            console.error('Error marking as complete:', error);
+            alert('Error updating progress. Please try again.');
+        }
+    },
+
     copyToClipboard: function() {
         if (!this.currentExplanation) {
             alert('No explanation to copy');
@@ -136,7 +299,7 @@ const textExplanationModule = {
                 body: JSON.stringify({
                     text: this.currentExplanation,
                     topic: topic,
-                    type: 'tts'
+                    audio_type: 'tts'
                 })
             });
             
@@ -155,7 +318,40 @@ const textExplanationModule = {
         }
     },
     
-    currentExplanation: null
+    formatText: function(text) {
+        // Basic text formatting
+        let formatted = text
+            // Convert line breaks to paragraphs
+            .split('\n\n')
+            .map(paragraph => {
+                if (paragraph.trim()) {
+                    // Format bold text (assuming **text** or *text* format)
+                    paragraph = paragraph.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    paragraph = paragraph.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                    
+                    // Convert single line breaks to <br> within paragraphs
+                    paragraph = paragraph.replace(/\n/g, '<br>');
+                    
+                    return '<p>' + paragraph + '</p>';
+                }
+                return '';
+            })
+            .join('');
+        
+        // Handle headings (assuming # Heading format)
+        formatted = formatted.replace(/^<p># (.*?)<\/p>$/gm, '<h3>$1</h3>');
+        formatted = formatted.replace(/^<p>## (.*?)<\/p>$/gm, '<h4>$1</h4>');
+        
+        // Handle lists (assuming - item format)
+        formatted = formatted.replace(/<p>- (.*?)<\/p>/g, '<li>$1</li>');
+        formatted = formatted.replace(/(<li>.*?<\/li>)+/g, '<ul>$&</ul>');
+        
+        return formatted;
+    },
+    
+    currentExplanation: null,
+    currentTopicId: null,
+    pageStartTs: null
 };
 
 // Initialize when DOM is ready
