@@ -220,16 +220,44 @@ const codeGenerationModule = {
     },
     
     showMarkCompleteButton: function() {
-        const outputSection = document.getElementById('outputSection');
+        const outputSection = document.getElementById('codeOutputSection');
+        if (!outputSection) {
+            console.error('Output section not found');
+            return;
+        }
+
+        // Check if the button already exists
         let markCompleteBtn = document.getElementById('markCompleteBtn');
+        
         if (!markCompleteBtn) {
+            // Create the button if it doesn't exist
             markCompleteBtn = document.createElement('button');
             markCompleteBtn.id = 'markCompleteBtn';
             markCompleteBtn.textContent = 'Mark as Complete';
-            markCompleteBtn.className = 'btn-primary';
+            markCompleteBtn.className = 'btn btn-primary mt-3';
             markCompleteBtn.onclick = () => this.markAsComplete();
-            outputSection.appendChild(markCompleteBtn);
+
+            // Create a container for the button
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'text-center mt-3';
+            buttonContainer.appendChild(markCompleteBtn);
+
+            // Add the button after the code content
+            const codeContent = document.getElementById('codeContent');
+            if (codeContent) {
+                // Insert after the code content
+                const parent = codeContent.parentNode;
+                if (parent && parent.parentNode) {
+                    parent.parentNode.insertBefore(buttonContainer, parent.nextSibling);
+                } else {
+                    outputSection.appendChild(buttonContainer);
+                }
+            } else {
+                outputSection.appendChild(buttonContainer);
+            }
         }
+        
+        // Make sure the button is visible
         markCompleteBtn.style.display = 'inline-block';
     },
 
