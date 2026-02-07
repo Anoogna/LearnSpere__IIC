@@ -91,7 +91,62 @@ class ImageUtils:
                 print(f"Enhanced programmatic {diagram_type} diagram created as fallback")
                 return result
             else:
-                print(f"All diagram generation methods failed")
+                # Default to smart placeholder diagram generation
+                return self._generate_placeholder_diagram(prompt, filename, diagram_type, variation)
+        except Exception as e:
+            print(f"Error generating image: {str(e)}")
+            return None
+
+    def _generate_svg_placeholder(self, prompt: str, filename: Optional[str] = None) -> Optional[Tuple[str, str]]:
+        try:
+            if filename is None:
+                filename = f"diagram_generated_{self._unique_stamp()}.svg"
+            if not filename.lower().endswith('.svg'):
+                filename = os.path.splitext(filename)[0] + '.svg'
+
+            filepath = os.path.join(self.output_dir, filename)
+            title = (prompt or "Concept Visualization").strip().replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            if len(title) > 80:
+                title = title[:77] + '...'
+
+            svg = f"""<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"900\" height=\"500\" viewBox=\"0 0 900 500\">
+  <rect x=\"0\" y=\"0\" width=\"900\" height=\"500\" fill=\"#ffffff\"/>
+  <rect x=\"40\" y=\"40\" width=\"820\" height=\"420\" rx=\"18\" fill=\"#f8f9fa\" stroke=\"#667eea\" stroke-width=\"3\"/>
+  <text x=\"450\" y=\"120\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"26\" fill=\"#333\">ML Concept Diagram</text>
+  <text x=\"450\" y=\"190\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"18\" fill=\"#555\">{title}</text>
+  <circle cx=\"250\" cy=\"320\" r=\"55\" fill=\"#667eea\" opacity=\"0.85\"/>
+  <circle cx=\"450\" cy=\"320\" r=\"55\" fill=\"#764ba2\" opacity=\"0.85\"/>
+  <circle cx=\"650\" cy=\"320\" r=\"55\" fill=\"#28a745\" opacity=\"0.85\"/>
+  <line x1=\"305\" y1=\"320\" x2=\"395\" y2=\"320\" stroke=\"#999\" stroke-width=\"3\"/>
+  <line x1=\"505\" y1=\"320\" x2=\"595\" y2=\"320\" stroke=\"#999\" stroke-width=\"3\"/>
+  <text x=\"250\" y=\"326\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"14\" fill=\"#fff\">Input</text>
+  <text x=\"450\" y=\"326\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"14\" fill=\"#fff\">Model</text>
+  <text x=\"650\" y=\"326\" text-anchor=\"middle\" font-family=\"Arial\" font-size=\"14\" fill=\"#fff\">Output</text>
+</svg>"""
+
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(svg)
+
+            web_path = filepath.replace('\\', '/')
+            return filepath, f"/{web_path}"
+        except Exception as e:
+            print(f"Error generating SVG diagram: {str(e)}")
+            return None
+    
+    def _generate_with_stable_diffusion(self, prompt: str, filename: Optional[str] = None) -> Optional[Tuple[str, str]]:
+        """
+        Generate image using Stable Diffusion via HuggingFace
+        Requires HF_TOKEN environment variable
+        """
+        try:
+            hf_token = os.getenv('HUGGINGFACE_API_KEY', '').strip()
+            
+            # Check if token is valid (not placeholder or empty)
+            if not hf_token or len(hf_token) < 10:
+                print("[ERROR] HUGGINGFACE_API_KEY not set or is invalid for Stable Diffusion")
+                print("   Get your token from: https://huggingface.co/settings/tokens")
+                print("   Set the HUGGINGFACE_API_KEY environment variable")
+>>>>>>> clean-main
                 return None
                 
         except Exception as e:
@@ -175,7 +230,35 @@ class ImageUtils:
                 with open(filepath, 'wb') as f:
                     f.write(response.content)
                 
-                return filepath, f"/uploads/images/{filename}"
+                print(f"[SUCCESS] Image saved to: {filepath}")
+                web_path = filepath.replace('\\', '/')
+                return filepath, f"/{web_path}"
+            
+            elif response.status_code == 503:
+                print(f"[ERROR] Stable Diffusion model is loading (503 error). Try again in a moment.")
+                try:
+                    error_data = response.json()
+                    if 'estimated_time' in error_data:
+                        print(f"   Estimated reload time: {error_data['estimated_time']} seconds")
+                except:
+                    pass
+                return None
+            
+            elif response.status_code == 401:
+                print(f"[ERROR] Authentication failed (401). Invalid HUGGINGFACE_API_KEY.")
+                return None
+            
+            elif response.status_code == 429:
+                print(f"[ERROR] Rate limited (429). Too many requests. Please wait.")
+                return None
+            
+            else:
+                print(f"[ERROR] Stable Diffusion API error ({response.status_code}): {response.text[:200]}")
+                return None
+                
+        except requests.exceptions.Timeout:
+            print(f"[ERROR] Stable Diffusion request timed out (30 seconds). Model may be slow to respond.")
+>>>>>>> clean-main
             return None
         except:
             return None

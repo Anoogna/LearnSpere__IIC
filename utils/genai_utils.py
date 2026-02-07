@@ -482,5 +482,17 @@ def init_groq(api_key: Optional[str] = None):
     groq_utils = GroqAIUtils(api_key)
 
 def get_groq():
+<<<<<<< HEAD
     """Get the global Groq utility instance"""
+=======
+    """Get the Groq utility instance"""
+    global groq_utils
+    if groq_utils is None:
+        # Initialize with API key from environment
+        api_key = os.getenv('GROQ_API_KEY')
+        if not api_key:
+            print("[ERROR] GROQ_API_KEY environment variable not set")
+            print("Please set the GROQ_API_KEY environment variable")
+            return None
+        groq_utils = GroqAIUtils(api_key)
     return groq_utils
