@@ -29,18 +29,21 @@ class GroqAIUtils:
         Returns:
             Structured explanation text
         """
-        prompt = f"""You are an expert ML educator.
+        prompt = f"""You are an expert ML educator. Provide a comprehensive explanation of the following topic: {topic}.
 
-Topic: {topic}
-Complexity Level: {complexity_level}
+Your response should be structured in markdown format with clear headings and sections.
 
-Write a clear, learner-friendly explanation in markdown.
+Cover the following aspects:
 
-Rules:
-- Do NOT output a code-only answer.
-- Do NOT dump full programs.
-- If you include code, limit it to a short illustrative snippet (max 10-20 lines) under an explicit "Code Snippet (Optional)" section.
-- Every section below must contain explanatory text.
+- Basic definition and intuition
+- Key concepts and terminology
+- Mathematical foundations (if applicable)
+- Practical applications
+- Common pitfalls and best practices
+
+Keep the explanation educational, clear, and engaging. Use simple language and avoid jargon where possible.
+
+IMPORTANT: Provide ONLY text explanation. Absolutely NO code, NO code snippets, NO code examples, NO programming code at all. Even if the topic involves algorithms or programming concepts, explain them in plain text without writing any code. Focus purely on explanatory prose.
 
 Include these sections (use headings):
 1. Brief Overview (2-3 sentences)

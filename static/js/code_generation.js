@@ -92,7 +92,7 @@ const codeGenerationModule = {
                 codeContent.textContent = data.code;
                 this.currentCode = data.code;
                 this.currentDependencies = data.dependencies;
-                await this.trackProgress('code');
+                // Removed auto-progress tracking
                 
                 // Display dependencies
                 dependenciesList.innerHTML = '';
@@ -204,9 +204,7 @@ const codeGenerationModule = {
 
             try {
                 const data = await resp.json();
-                if (data && data.quiz_checkpoint && data.quiz_topic_id) {
-                    window.location.href = `/quiz/${encodeURIComponent(data.quiz_topic_id)}`;
-                }
+                // Removed auto-navigation to quiz
             } catch (e) {
                 // ignore
             }

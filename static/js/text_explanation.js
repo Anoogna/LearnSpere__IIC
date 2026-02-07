@@ -62,15 +62,47 @@ const textExplanationModule = {
         explanationContent.style.display = 'none';
         
         try {
-            const response = await fetch('/api/generate-explanation', {
+            // Get the current topic's content type from the module
+            let generationType = 'text'; // Default to text explanation
+            if (this.currentTopicId) {
+                try {
+                    const resp = await fetch(`/api/topic/${encodeURIComponent(this.currentTopicId)}`);
+                    const data = await resp.json();
+                    if (data.success && data.topic && data.topic.content_type) {
+                        generationType = data.topic.content_type;
+                    }
+                } catch (e) {
+                    console.warn('Could not fetch topic details, using default type', e);
+                }
+            }
+            
+            let apiEndpoint, requestBody;
+            
+            if (generationType === 'code') {
+                apiEndpoint = '/api/generate-code';
+                requestBody = {
+                    algorithm: topic,
+                    complexity: complexity
+                };
+            } else if (generationType === 'image') {
+                apiEndpoint = '/api/generate-image';
+                requestBody = {
+                    concept: topic
+                };
+            } else {
+                apiEndpoint = '/api/generate-explanation';
+                requestBody = {
+                    topic: topic,
+                    complexity: complexity
+                };
+            }
+            
+            const response = await fetch(apiEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    topic: topic,
-                    complexity: complexity
-                })
+                body: JSON.stringify(requestBody)
             });
             
             if (!response.ok) {
@@ -82,12 +114,22 @@ const textExplanationModule = {
             if (data.success) {
                 loadingIndicator.style.display = 'none';
                 explanationContent.style.display = 'block';
-                explanationContent.innerHTML = this.formatText(data.explanation);
-                this.currentExplanation = data.explanation;
+                
+                if (generationType === 'code') {
+                    explanationContent.innerHTML = `<h3>Generated Code</h3><pre><code>${data.code}</code></pre>`;
+                    this.currentExplanation = data.code;
+                } else if (generationType === 'image') {
+                    explanationContent.innerHTML = `<h3>Generated Image Prompt</h3><p>${data.prompt}</p>`;
+                    this.currentExplanation = data.prompt;
+                } else {
+                    explanationContent.innerHTML = this.formatText(data.explanation || data.text || data);
+                    this.currentExplanation = data.explanation || data.text || data;
+                }
+                
                 if (nextTopicBtn && this.currentTopicId) nextTopicBtn.style.display = 'inline-block';
-                await this.trackProgress('text');
+                if (nextTopicBtn && this.currentTopicId) nextTopicBtn.style.display = 'inline-block';
             } else {
-                throw new Error(data.error || 'Failed to generate explanation');
+                throw new Error(data.error || 'Failed to generate content');
             }
         } catch (error) {
             console.error('Error:', error);

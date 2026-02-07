@@ -35,10 +35,10 @@
       "current_module": "data_preprocessing",
       "current_topic": "decision_trees",
       "total_time_spent": 2,
-      "last_activity": "2026-02-07T07:42:42.373771",
+      "last_activity": "2026-02-07T08:29:47.489829",
       "modality_usage": {
         "text": 9,
-        "code": 11,
+        "code": 12,
         "audio": 0,
         "image": 0
       },
@@ -237,6 +237,14 @@
           "completed": true,
           "time_spent": 0,
           "modality": "code"
+        },
+        {
+          "ts": "2026-02-07T08:29:47.489829",
+          "topic_id": "decision_trees",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "code"
         }
       ],
       "error_patterns": {
@@ -254,52 +262,13 @@
     },
     "user2": {
       "username": "user2",
-      "started_at": "2026-02-07T07:00:33.945824",
-      "modules_completed": [
-        "ml_basics"
-      ],
-      "topics_completed": [
-        "what_is_ml",
-        "data_types",
-        "ml_workflow"
-      ],
-      "quiz_scores": {},
-      "current_module": "ml_basics",
-      "current_topic": "ml_workflow",
+      "started_at": "2026-02-07T08:29:12.292088",
+      "modules_completed": [],
+      "topics_completed": [],
+      "current_module": null,
+      "current_topic": null,
       "total_time_spent": 0,
-      "last_activity": "2026-02-07T08:23:36.432187",
-      "modality_usage": {
-        "text": 3,
-        "code": 0,
-        "audio": 0,
-        "image": 0
-      },
-      "interaction_history": [
-        {
-          "ts": "2026-02-07T08:13:16.425406",
-          "topic_id": "what_is_ml",
-          "event": "generated",
-          "completed": true,
-          "time_spent": 0,
-          "modality": "text"
-        },
-        {
-          "ts": "2026-02-07T08:23:31.148576",
-          "topic_id": "data_types",
-          "event": "generated",
-          "completed": true,
-          "time_spent": 0,
-          "modality": "text"
-        },
-        {
-          "ts": "2026-02-07T08:23:36.432187",
-          "topic_id": "ml_workflow",
-          "event": "generated",
-          "completed": true,
-          "time_spent": 0,
-          "modality": "text"
-        }
-      ]
+      "last_activity": "2026-02-07T08:29:12.292088"
     },
     "User": {
       "username": "User",
@@ -310,6 +279,24 @@
       "current_topic": null,
       "total_time_spent": 0,
       "last_activity": "2026-02-07T07:31:03.542554"
+    },
+    "user3": {
+      "username": "user3",
+      "started_at": "2026-02-07T08:44:11.624059",
+      "modules_completed": [],
+      "topics_completed": [],
+      "quiz_scores": {},
+      "current_module": null,
+      "current_topic": null,
+      "total_time_spent": 0,
+      "last_activity": "2026-02-07T08:44:11.624059",
+      "modality_usage": {
+        "text": 0,
+        "code": 0,
+        "audio": 0,
+        "image": 0
+      },
+      "interaction_history": []
     }
   }
 }

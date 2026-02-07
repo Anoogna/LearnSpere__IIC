@@ -7,6 +7,10 @@ const audioLearningModule = {
         this.initTopicFromUrl();
         this.attachEventListeners();
         this.loadRecentAudios();
+        this.isReading = false;
+        
+        // Stop audio when leaving the page
+        window.addEventListener('beforeunload', () => this.stopReading());
     },
     
     attachEventListeners: function() {
@@ -34,6 +38,11 @@ const audioLearningModule = {
     handleFormSubmit: async function(e) {
         e.preventDefault();
         
+        if (this.isReading) {
+            this.stopReading();
+            return;
+        }
+        
         const topic = document.getElementById('audioTopic').value;
         const length = document.getElementById('audioLength').value;
         
@@ -52,6 +61,7 @@ const audioLearningModule = {
         const audioSource = document.getElementById('audioSource');
         const transcriptContent = document.getElementById('transcriptContent');
         const nextTopicBtn = document.getElementById('nextTopicBtn');
+        const audioPlayer = document.getElementById('audioPlayer');
         
         generateBtn.disabled = true;
         outputSection.style.display = 'block';
@@ -83,8 +93,16 @@ const audioLearningModule = {
                 
                 if (data.audio_url) {
                     audioSource.src = data.audio_url;
-                    const audioPlayer = document.getElementById('audioPlayer');
                     audioPlayer.load();
+                    audioPlayer.play();
+                    this.isReading = true;
+                    generateBtn.textContent = 'Stop Reading';
+                    
+                    // Reset when audio ends
+                    audioPlayer.addEventListener('ended', () => {
+                        this.isReading = false;
+                        generateBtn.textContent = 'Generate Audio Lesson';
+                    }, { once: true });
                 }
                 
                 this.loadRecentAudios();
@@ -100,6 +118,18 @@ const audioLearningModule = {
         } finally {
             generateBtn.disabled = false;
         }
+    },
+
+    stopReading: function() {
+        const audioPlayer = document.getElementById('audioPlayer');
+        const generateBtn = document.querySelector('#audioForm button');
+        
+        if (audioPlayer) {
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+        }
+        this.isReading = false;
+        generateBtn.textContent = 'Generate Audio Lesson';
     },
 
     initTopicFromUrl: async function() {
@@ -174,9 +204,7 @@ const audioLearningModule = {
 
             try {
                 const data = await resp.json();
-                if (data && data.quiz_checkpoint && data.quiz_topic_id) {
-                    window.location.href = `/quiz/${encodeURIComponent(data.quiz_topic_id)}`;
-                }
+                // Removed auto-navigation to quiz
             } catch (e) {
                 // ignore
             }
