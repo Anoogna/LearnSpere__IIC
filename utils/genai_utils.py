@@ -86,26 +86,54 @@ Format the response as complete, runnable Python code."""
     
     def generate_audio_script(self, topic: str, length: str = "Medium") -> str:
         """
-        Generate conversational audio script for educational content
+        Generate bullet point audio script for educational content
         Args:
             topic: Topic to create script for
             length: "Brief", "Medium", "Comprehensive"
         Returns:
-            Conversational audio script
+            Structured bullet point audio script
         """
-        prompt = f"""You are an engaging ML educator creating an audio lesson script.
-
-Topic: {topic}
+        prompt = f"""Create structured learning notes for audio format about: {topic}
 Duration: {length} (Brief: 2-3 min, Medium: 5-8 min, Comprehensive: 10-15 min)
 
-Create a conversational, engaging script that:
-1. Starts with a hook/interesting question
-2. Explains the concept clearly WITHOUT jargon overload
-3. Includes one or two practical examples
-4. Has natural transitions and pauses markers [PAUSE]
-5. Ends with key takeaways and next steps
+Use ONLY bullet points and sub-bullets - NO bold formatting, NO music cues, NO [INTRO/OUTRO] markers.
+Just clean, direct text that sounds natural when read aloud.
 
-Write in a conversational tone as if explaining to a student during office hours."""
+Overview and Key Definition
+• What this topic is and why it matters
+• Core definition and importance in machine learning
+
+Main Concepts and Components
+• Key concept 1
+• Key concept 2
+• Key concept 3
+
+How It Works
+• Step or mechanism 1
+• Step or mechanism 2
+• Step or mechanism 3
+
+Real-World Applications and Examples
+• Practical application 1
+• Practical application 2
+
+Important Considerations
+• Advantages of this approach
+• Limitations or challenges
+• Common misconceptions
+
+Key Takeaways
+• Main learning point 1
+• Main learning point 2
+• Next steps for deeper learning
+
+Rules:
+- NO bold text markers (** or __)
+- NO music cues or stage directions
+- NO special formatting
+- Simple bullet points only
+- Clear, educational language
+- Each point complete but concise"""
         
         try:
             response = self.client.chat.completions.create(
@@ -119,41 +147,258 @@ Write in a conversational tone as if explaining to a student during office hours
         except Exception as e:
             return f"Error generating audio script: {str(e)}"
     
-    def generate_image_prompt(self, concept: str, diagram_type: str = "Conceptual") -> str:
+    def generate_image_prompt(self, concept: str, diagram_type: str = "Conceptual", perspective: str = None) -> str:
         """
-        Generate detailed prompts for educational diagram creation
-        Args:
-            concept: ML concept to visualize
-            diagram_type: "Conceptual", "Technical", "Flowchart"
-        Returns:
-            Detailed prompt for image generation
+        Generate intelligent, detailed prompts for educational diagram creation
         """
-        prompt = f"""Create a detailed visual prompt for generating an educational diagram explaining the following concept:
-
-Topic: {concept}
-Diagram Type: {diagram_type}
-
-The prompt should be detailed and specific for an image generation model, including:
-1. Visual style (clean, professional, educational)
-2. Main elements and their relationships
-3. Color scheme suggestions
-4. Text labels and annotations
-5. Composition and layout
-6. Any specific visual metaphors or approaches
-
-Provide a single, comprehensive prompt suitable for image generation AI."""
+        concept_lower = concept.lower()
         
-        try:
-            response = self.client.chat.completions.create(
-                model="llama-3.1-8b-instant",
-                messages=[
-                    {"role": "system", "content": "You are an expert at creating detailed prompts for educational diagram generation."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            return f"Error generating image prompt: {str(e)}"
+        # NEURAL NETWORK PROMPTS
+        if "neural network" in concept_lower or "neural" in concept_lower:
+            if diagram_type == "Conceptual":
+                if perspective == "architecture":
+                    return f"""Create a detailed neural network architecture diagram for {concept}. 
+                    Show 4 vertical layers: Input Layer (4 nodes), Hidden Layer 1 (6 nodes), Hidden Layer 2 (5 nodes), Output Layer (3 nodes).
+                    Each node is a colored circle. Draw lines connecting all nodes between adjacent layers showing the network structure.
+                    Use blue for input nodes, purple for hidden layers, and orange for output.
+                    Label each layer clearly. Add arrows showing data flow from left (input) to right (output).
+                    Professional educational style, clean white background, suitable for ML textbook."""
+                elif perspective == "training":
+                    return f"""Create an educational diagram showing neural network training process for {concept}.
+                    Left side: raw data with scattered points. Middle: network diagram with arrows showing forward pass.
+                    Right side: loss curve decreasing over iterations, backpropagation arrows.
+                    Show weights/parameters updating with red arrows indicating error flow backwards.
+                    Use green for correctly predicted items, red for errors. Modern infographic style."""
+                elif perspective == "applications":
+                    return f"""Create a visual showing real-world applications of {concept}.
+                    Divide into 4 quadrants: Image Recognition (show face/object detection), NLP (text/language), 
+                    Speech Recognition (audio waveforms), and Time Series (stock charts). 
+                    Each quadrant shows a neural network connected to the application domain.
+                    Use relevant icons and colors. Professional educational poster style."""
+                else:
+                    return f"""Create a beautiful, intuitive diagram for neural networks ({concept}).
+                    Show a neural network with clear layers, colorful nodes, connecting lines.
+                    Illustrate how neurons work together. Include a small example of pattern recognition.
+                    Use gradient colors from blue to purple to orange. Clean, modern educational design."""
+            
+            elif diagram_type == "Technical":
+                if perspective == "mathematics":
+                    return f"""Create a technical mathematical diagram for {concept}.
+                    Show mathematical equations: forward propagation formula (z = wx + b), activation function (sigmoid/relu curve),
+                    backpropagation gradient formula, and loss function graph.
+                    Include a small network diagram with weights labeled as w1, w2, etc.
+                    Display these formulas cleanly with proper mathematical notation.
+                    Academic paper quality, with clear mathematical symbols."""
+                else:
+                    return f"""Create a technical neural network architecture diagram for {concept}.
+                    Show detailed network with specific layer counts, neuron counts labeled at each layer.
+                    Include activation function names for each layer, weight matrices represented as WH1, WH2, W0.
+                    Show bias terms, learning rate notation. Include mathematical notation for forward pass.
+                    Engineering blueprint style, professional and precise."""
+            
+            elif diagram_type == "Flowchart":
+                if perspective == "training":
+                    return f"""Create a training flowchart for {concept}.
+                    Steps: Load Data → Initialize Weights → Forward Pass → Calculate Loss → Backward Pass → Update Weights → 
+                    Check Convergence (yes=stop, no=repeat). Show with rounded rectangles, clear arrows, decision diamonds.
+                    Color coding: blue for data steps, orange for computation, green for convergence.
+                    Include iteration counter and loss curve on the side. Professional workflow diagram."""
+                else:
+                    return f"""Create a neural network workflow flowchart for {concept}.
+                    Show main process: Input → Preprocessing → Network Inference → Output → Postprocessing.
+                    Each box contains sub-steps. Include feedback loops for training iterations.
+                    Use standard flowchart symbols with clear labels and arrows. Professional diagram."""
+        
+        # DECISION TREE PROMPTS
+        elif "decision tree" in concept_lower or "tree" in concept_lower:
+            if diagram_type == "Conceptual":
+                if perspective == "splitting":
+                    return f"""Create a detailed decision tree diagram for {concept}.
+                    Show a complete binary tree with: Root node asking about a feature, multiple decision nodes below it each asking about different features.
+                    Each path splits based on feature values (yes/no or thresholds). Leaf nodes show final classifications (Class A, Class B, Class C).
+                    Use blue for decision nodes, green for leaf nodes, red for rejected outcomes.
+                    Label each split with feature names. Professional educational diagram."""
+                elif perspective == "outcomes":
+                    return f"""Create a decision tree visualization for {concept} showing outcomes.
+                    Display multiple paths from root to leaf, with each complete path highlighted.
+                    Show the final classification at each leaf node with examples of data points in each class.
+                    Color code the paths by outcome class. Include a legend showing what variables mean.
+                    Clear and educational, suitable for explaining decision logic."""
+                else:
+                    return f"""Create a clear decision tree diagram for {concept}.
+                    Show hierarchical structure with branching decisions at each level.
+                    Root node at top, decision nodes in middle levels, leaf nodes at bottom showing classifications.
+                    Use distinct colors for different depths and outcomes. Label branches with decision criteria.
+                    Professional educational style."""
+            
+            elif diagram_type == "Technical":
+                if perspective == "algorithms":
+                    return f"""Create a technical decision tree algorithm diagram for {concept}.
+                    Show the recursive splitting process with Gini impurity or information gain calculations at each node.
+                    Include mathematical notation for splitting criteria. Show how Gini changes at each split.
+                    Display the decision boundary in feature space with threshold values labeled.
+                    Academic technical diagram style."""
+                else:
+                    return f"""Create a technical decision tree diagram for {concept}.
+                    Show detailed tree structure with entropy/Gini values at each node.
+                    Include threshold values for splits, number of samples at each node.
+                    Display the pruning point and optimal tree size chart on the side.
+                    Engineering documentation style."""
+            
+            elif diagram_type == "Flowchart":
+                return f"""Create a decision tree construction flowchart for {concept}.
+                Steps: Select Best Feature → Split Data → Recursive Call on Subsets → Check Stopping Criteria → Prune Tree → Validate.
+                Show with clear boxes and arrows. Include decision diamonds for stopping conditions.
+                Color code by process type: blue for selection, orange for splitting, green for validation.
+                Professional algorithm flowchart."""
+        
+        # SVM PROMPTS
+        elif "support vector" in concept_lower or "svm" in concept_lower:
+            if diagram_type == "Conceptual":
+                if perspective == "margin":
+                    return f"""Create an SVM visualization for {concept} emphasizing margins.
+                    Show 2D scatter plot with: Red dots for Class 1 (left side), Blue dots for Class 2 (right side).
+                    Draw the decision boundary (black line) separating the classes perfectly.
+                    Highlight the margins on both sides (orange dashed lines) showing the maximum margin.
+                    Circle the support vectors (critical points). Show the margin width with arrows.
+                    Professional ML educational diagram."""
+                elif perspective == "kernels":
+                    return f"""Create an SVM kernel transformation diagram for {concept}.
+                    Left side: 2D plot showing non-linearly separable data (scattered mixed points).
+                    Arrow labeled "Kernel Transformation" in middle.
+                    Right side: 3D plot showing how data transforms to be linearly separable in higher dimension.
+                    Show the hyperplane clearly separating classes in the transformed space.
+                    Use gradient colors to show the transformation. Educational poster style."""
+                else:
+                    return f"""Create a clear SVM diagram for {concept}.
+                    Show 2D scatter plot with two distinct classes of points in different colors.
+                    Draw the optimal separating hyperplane (decision boundary) as a straight line.
+                    Highlight the support vectors and the margin region.
+                    Include legend explaining each element. Professional educational diagram."""
+            
+            elif diagram_type == "Technical":
+                return f"""Create a technical SVM diagram for {concept}.
+                Show: data points, decision boundary, margin width with measurements, support vectors highlighted.
+                Include mathematical notation for the optimization objective: minimize ||w|| subject to constraints.
+                Show the kernel function selection options (linear, RBF, polynomial).
+                Display the dual problem formulation with alpha coefficients.
+                Academic technical diagram."""
+            
+            elif diagram_type == "Flowchart":
+                return f"""Create an SVM training flowchart for {concept}.
+                Steps: Load Data → Choose Kernel → Solve Optimization Problem → Find Support Vectors → 
+                Compute Decision Boundary → Validate → Deploy. Show with clear boxes,decision points for parameter tuning.
+                Professional algorithm workflow diagram."""
+        
+        # REGRESSION PROMPTS
+        elif "regression" in concept_lower or "linear" in concept_lower:
+            if diagram_type == "Conceptual":
+                return f"""Create a regression visualization for {concept}.
+                Show: X-Y scatter plot with red data points, blue regression line fitting through the data.
+                Display confidence interval bands around the line in light blue. Show some residuals as vertical orange lines.
+                Include labels for axes: Feature on X-axis, Target/Prediction on Y-axis.
+                Show R-squared value. Professional statistical diagram."""
+            elif diagram_type == "Technical":
+                return f"""Create a technical regression diagram for {concept}.
+                Show: scatter points, fitted line, residuals clearly marked, loss function curve, gradient descent steps.
+                Include mathematical notation for least squares formula, R-squared calculation.
+                Display the cost curve decreasing over iterations. Professional technical diagram."""
+            elif diagram_type == "Flowchart":
+                return f"""Create a regression training flowchart for {concept}.
+                Show: Initialize Parameters → Compute Predictions → Calculate Loss → Gradient Descent → Update Parameters → 
+                Check Convergence → Make Predictions. Professional workflow style."""
+        
+        # CLUSTERING PROMPTS  
+        elif "clustering" in concept_lower or "k-means" in concept_lower:
+            if diagram_type == "Conceptual":
+                return f"""Create a clustering visualization for {concept}.
+                Show: 2D scatter plot with points in 3 distinct clusters (red, blue, green colors).
+                Mark the centroid of each cluster with a larger X symbol.
+                Show cluster boundaries with faint circles around each cluster.
+                Display some arrows pointing from points to their nearest centroid.
+                Educational data science diagram."""
+            elif diagram_type == "Technical":
+                return f"""Create a technical clustering diagram for {concept}.
+                Show multiple iterations: Initial random centroids → First assignment → First update → 
+                Convergence after iterations. Show separated clusters, distance calculations, within-cluster sum of squares.
+                Professional technical diagram."""
+            elif diagram_type == "Flowchart":
+                return f"""Create a K-means flowchart for {concept}.
+                Steps: Initialize K Centroids → Assign Points to Nearest Centroid → Update Centroids →
+                Check Convergence (yes=stop, no=repeat). Show iteration counter and convergence metric.
+                Professional algorithm diagram."""
+        
+        # GENERIC FALLBACK
+        else:
+            if diagram_type == "Conceptual":
+                return f"""Create an educational diagram for {concept}.
+                Show the main topic in the center connected to 6 related concepts around it.
+                Use different colors for different aspects. Draw connecting lines showing relationships.
+                Label everything clearly. Professional educational infographic style."""
+            elif diagram_type == "Technical":
+                return f"""Create a detailed technical diagram for {concept}.
+                Show system architecture with components, data flow, processing steps.
+                Include technical labels and measurements. Professional documentation style."""
+            elif diagram_type == "Flowchart":
+                return f"""Create a process flowchart for {concept}.
+                Show main steps in sequence with decision points and feedback loops.
+                Use standard flowchart symbols. Professional workflow diagram."""
+        
+        return f"Create an educational diagram for {concept}"
+    
+    def get_diverse_perspectives(self, topic: str) -> list:
+        """
+        Generate diverse perspectives/aspects for a topic to create unique visualizations
+        Returns list of (diagram_type, perspective) tuples for varied image generation
+        """
+        topic_lower = topic.lower()
+        perspectives = []
+        
+        if "neural network" in topic_lower or "neural" in topic_lower:
+            perspectives = [
+                ("Conceptual", "architecture"),
+                ("Technical", "mathematics"),
+                ("Flowchart", "training"),
+                ("Conceptual", "applications"),
+            ]
+        elif "decision tree" in topic_lower or "tree" in topic_lower:
+            perspectives = [
+                ("Conceptual", "splitting"),
+                ("Technical", "algorithms"),
+                ("Flowchart", "construction"),
+                ("Technical", "metrics"),
+            ]
+        elif "support vector" in topic_lower or "svm" in topic_lower:
+            perspectives = [
+                ("Conceptual", "margin"),
+                ("Technical", "classification"),
+                ("Conceptual", "kernels"),
+                ("Flowchart", None),
+            ]
+        elif "regression" in topic_lower or "linear" in topic_lower:
+            perspectives = [
+                ("Conceptual", None),
+                ("Technical", "mathematics"),
+                ("Flowchart", "optimization"),
+                ("Conceptual", "applications"),
+            ]
+        elif "clustering" in topic_lower or "k-means" in topic_lower:
+            perspectives = [
+                ("Conceptual", None),
+                ("Technical", "algorithms"),
+                ("Flowchart", None),
+                ("Conceptual", "applications"),
+            ]
+        else:
+            # Generic perspectives for any topic
+            perspectives = [
+                ("Conceptual", None),
+                ("Technical", None),
+                ("Flowchart", None),
+                ("Conceptual", "applications"),
+            ]
+        
+        return perspectives
     
     def detect_dependencies(self, code: str) -> List[str]:
         """
