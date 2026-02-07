@@ -35,7 +35,7 @@
       "current_module": "data_preprocessing",
       "current_topic": "decision_trees",
       "total_time_spent": 2,
-      "last_activity": "2026-02-07T08:29:47.489829",
+      "last_activity": "2026-02-07T10:03:48.103133",
       "modality_usage": {
         "text": 9,
         "code": 12,
@@ -245,12 +245,19 @@
           "completed": true,
           "time_spent": 0,
           "modality": "code"
+        },
+        {
+          "ts": "2026-02-07T10:03:48.103133",
+          "topic_id": "neutral networks",
+          "event": "quiz_submitted",
+          "score": 40.0,
+          "passed": false
         }
       ],
       "error_patterns": {
         "neutral networks": {
-          "attempts": 2,
-          "failures": 2,
+          "attempts": 3,
+          "failures": 3,
           "last_score": 40.0
         },
         "decision_trees": {
@@ -297,6 +304,55 @@
         "image": 0
       },
       "interaction_history": []
+    },
+    "user4": {
+      "username": "user4",
+      "started_at": "2026-02-07T10:38:18.948298",
+      "modules_completed": [
+        "ml_basics"
+      ],
+      "topics_completed": [
+        "what_is_ml",
+        "data_types",
+        "ml_workflow"
+      ],
+      "quiz_scores": {},
+      "current_module": "ml_basics",
+      "current_topic": "ml_workflow",
+      "total_time_spent": 13,
+      "last_activity": "2026-02-07T10:52:20.712380",
+      "modality_usage": {
+        "text": 3,
+        "code": 0,
+        "audio": 0,
+        "image": 0
+      },
+      "interaction_history": [
+        {
+          "ts": "2026-02-07T10:51:50.081136",
+          "topic_id": "what_is_ml",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 13,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T10:52:08.435375",
+          "topic_id": "data_types",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T10:52:20.712380",
+          "topic_id": "ml_workflow",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        }
+      ]
     }
   }
 }

@@ -905,5 +905,77 @@
       }
     ],
     "quiz_id": "gen_738e10f69f3a4b6caf641710e786f35c"
+  },
+  "gen_170c57c8074343f4b7160bdef865ed8b": {
+    "topic": "neutral networks",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is the primary purpose of a neutral network?",
+        "options": [
+          "To optimize complex systems",
+          "To classify data",
+          "To generate new data",
+          "To predict continuous values"
+        ],
+        "correct": 0,
+        "explanation": "A neutral network is used to optimize complex systems through learning from data.",
+        "sentiment_score": 0.9946304559707642,
+        "qa_confidence": 0.4515314996242523
+      },
+      {
+        "question": "What type of data can neutral networks handle?",
+        "options": [
+          "Only categorical data",
+          "Only numerical data",
+          "Both categorical and numerical data",
+          "Only text data"
+        ],
+        "correct": 2,
+        "explanation": "Neutral networks can handle both categorical and numerical data.",
+        "sentiment_score": 0.9977794289588928,
+        "qa_confidence": 0.15245577692985535
+      },
+      {
+        "question": "What is the process of adjusting the weights of a neutral network's connections called?",
+        "options": [
+          "Backpropagation",
+          "Forward Propagation",
+          "Activation",
+          "Optimization"
+        ],
+        "correct": 0,
+        "explanation": "Backpropagation is the process of adjusting the weights of a neutral network's connections.",
+        "sentiment_score": 0.9982715845108032,
+        "qa_confidence": 0.8110588891431689
+      },
+      {
+        "question": "What is a common application of neutral networks in machine learning?",
+        "options": [
+          "Recommendation systems",
+          "Image classification",
+          "Time series forecasting",
+          "All of the above"
+        ],
+        "correct": 3,
+        "explanation": "Neutral networks are commonly used in recommendation systems, image classification, and time series forecasting.",
+        "sentiment_score": 0.9962347149848938,
+        "qa_confidence": 0.68074087734567
+      },
+      {
+        "question": "What is the term for a neutral network that is trained to perform a specific task?",
+        "options": [
+          "Model",
+          "Network",
+          "Layer",
+          "Architecture"
+        ],
+        "correct": 0,
+        "explanation": "A model is a type of neutral network that is trained to perform a specific task.",
+        "sentiment_score": 0.9880946278572083,
+        "qa_confidence": 0.9920658469200134
+      }
+    ],
+    "quiz_id": "gen_170c57c8074343f4b7160bdef865ed8b"
   }
 }

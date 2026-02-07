@@ -3,6 +3,82 @@
 {% block title %}Learning Progress - ML Learning Assistant{% endblock %}
 
 {% block content %}
+<style>
+/* Card styling with glass effect */
+.summary-card, .next-topic-card, .roadmap-container, .module-card {
+    background: rgba(25, 28, 36, 0.7) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+}
+
+.roadmap-module-content {
+    background: rgba(35, 38, 46, 0.6) !important;
+    border-radius: 8px;
+    margin: 5px 0;
+    padding: 10px;
+}
+
+/* Text styling for better visibility */
+h1, h2, h3, h4, h5, h6 {
+    color: #ffffff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    font-weight: 600;
+}
+
+.progress-subtitle, .module-progress-text, .roadmap-topic, .topic-content p {
+    color: rgba(255, 255, 255, 0.9) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.stat-number, .stat-label, .progress-text {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Card specific text */
+.summary-content h3, .module-title h3, .module-status {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* Progress bars */
+.progress-bar {
+    background: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) inset;
+}
+
+.progress-fill {
+    background: linear-gradient(90deg, #4f46e5, #7c3aed) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+    color: white !important;
+    border: none !important;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4) !important;
+}
+
+/* Module cards */
+.module-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.module-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
+}
+</style>
 <div class="progress-dashboard">
     <div class="container">
         <div class="progress-header">
@@ -79,11 +155,8 @@
 
         <!-- Progress Actions -->
         <div class="progress-actions">
-            <button class="btn-secondary" onclick="resetProgress()">
-                🔄 Reset Progress
-            </button>
             <button class="btn-primary" onclick="refreshProgress()">
-                🔄 Refresh Progress
+                🔄 Refresh
             </button>
         </div>
     </div>
@@ -853,35 +926,8 @@ function formatTime(minutes) {
     }
 }
 
-async function resetProgress() {
-    if (!confirm('Are you sure you want to reset all your progress? This action cannot be undone.')) {
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/reset-progress', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            alert('Progress reset successfully!');
-            loadProgress();
-        } else {
-            alert('Error resetting progress: ' + data.error);
-        }
-    } catch (error) {
-        console.error('Error resetting progress:', error);
-        alert('Error resetting progress. Please try again.');
-    }
-}
-
-function refreshProgress() {
-    loadProgress();
+async function refreshProgress() {
+    await loadProgress();
 }
 
 // Initialize

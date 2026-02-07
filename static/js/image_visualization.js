@@ -174,8 +174,9 @@ const imageVisualizationModule = {
                 }
                 this.displayImage(data.image_url, diagramType, gallery);
                 this.generatedImages = [data];
-                await this.trackProgress('image');
-                if (nextTopicBtn && this.currentTopicId) nextTopicBtn.style.display = 'inline-block';
+                // Removed auto-progress tracking
+                // Show "Mark as Complete" button instead of automatically showing next topic
+                this.showMarkCompleteButton();
             } else {
                 throw new Error(data.error || 'Failed to generate image');
             }
@@ -227,8 +228,9 @@ const imageVisualizationModule = {
                 data.images.forEach((img, index) => {
                     this.displayImage(img.image_url, img.diagram_type, gallery);
                 });
-                await this.trackProgress('image');
-                if (nextTopicBtn && this.currentTopicId) nextTopicBtn.style.display = 'inline-block';
+                // Removed auto-progress tracking
+                // Show "Mark as Complete" button instead of automatically showing next topic
+                this.showMarkCompleteButton();
             } else {
                 throw new Error(data.error || 'Failed to generate images');
             }
@@ -241,6 +243,35 @@ const imageVisualizationModule = {
         }
     },
     
+    showMarkCompleteButton: function() {
+        const outputSection = document.getElementById('imageOutputSection');
+        let markCompleteBtn = document.getElementById('markCompleteBtn');
+        if (!markCompleteBtn) {
+            markCompleteBtn = document.createElement('button');
+            markCompleteBtn.id = 'markCompleteBtn';
+            markCompleteBtn.textContent = 'Mark as Complete';
+            markCompleteBtn.className = 'btn-primary';
+            markCompleteBtn.onclick = () => this.markAsComplete();
+            outputSection.appendChild(markCompleteBtn);
+        }
+        markCompleteBtn.style.display = 'inline-block';
+    },
+
+    markAsComplete: async function() {
+        if (!this.currentTopicId) return;
+        
+        try {
+            await this.trackProgress('image');
+            // Hide the mark complete button and show next topic button
+            document.getElementById('markCompleteBtn').style.display = 'none';
+            const nextTopicBtn = document.getElementById('nextTopicBtn');
+            if (nextTopicBtn) nextTopicBtn.style.display = 'inline-block';
+        } catch (error) {
+            console.error('Error marking as complete:', error);
+            alert('Error updating progress. Please try again.');
+        }
+    },
+
     displayImage: function(imageUrl, diagramType, gallery) {
         const item = document.createElement('div');
         item.className = 'gallery-item';

@@ -214,4 +214,11 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/code_generation.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof codeGenerationModule !== 'undefined') {
+            codeGenerationModule.init();
+        }
+    });
+</script>
 {% endblock %}

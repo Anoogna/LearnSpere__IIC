@@ -2,6 +2,11 @@
 // Handles Python code generation for ML algorithms
 
 const codeGenerationModule = {
+    // Initialize variables
+    currentCode: null,
+    currentDependencies: [],
+    currentTopicId: null,
+    pageStartTs: null,
     init: function() {
         console.log('Code generation module initialized');
         this.initTopicFromUrl();
@@ -119,7 +124,8 @@ const codeGenerationModule = {
                     codeContent.parentElement.insertBefore(errorMsg, codeContent);
                 }
 
-                if (nextTopicBtn && this.currentTopicId) nextTopicBtn.style.display = 'inline-block';
+                // Show "Mark as Complete" button instead of automatically showing next topic
+                this.showMarkCompleteButton();
             } else {
                 throw new Error(data.error || 'Failed to generate code');
             }
@@ -213,6 +219,35 @@ const codeGenerationModule = {
         }
     },
     
+    showMarkCompleteButton: function() {
+        const outputSection = document.getElementById('outputSection');
+        let markCompleteBtn = document.getElementById('markCompleteBtn');
+        if (!markCompleteBtn) {
+            markCompleteBtn = document.createElement('button');
+            markCompleteBtn.id = 'markCompleteBtn';
+            markCompleteBtn.textContent = 'Mark as Complete';
+            markCompleteBtn.className = 'btn-primary';
+            markCompleteBtn.onclick = () => this.markAsComplete();
+            outputSection.appendChild(markCompleteBtn);
+        }
+        markCompleteBtn.style.display = 'inline-block';
+    },
+
+    markAsComplete: async function() {
+        if (!this.currentTopicId) return;
+        
+        try {
+            await this.trackProgress('code');
+            // Hide the mark complete button and show next topic button
+            document.getElementById('markCompleteBtn').style.display = 'none';
+            const nextTopicBtn = document.getElementById('nextTopicBtn');
+            if (nextTopicBtn) nextTopicBtn.style.display = 'inline-block';
+        } catch (error) {
+            console.error('Error marking as complete:', error);
+            alert('Error updating progress. Please try again.');
+        }
+    },
+
     copyCode: function() {
         if (!this.currentCode) {
             alert('No code to copy');
