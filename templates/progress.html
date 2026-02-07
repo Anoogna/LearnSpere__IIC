@@ -728,7 +728,7 @@ function updateModules() {
 
             <div class="topics-list">
                 ${module.topics.map(topic => `
-                    <div class="topic-item ${getTopicStatus(topic)}" ${topic.completed ? '' : `onclick="navigateToTopic('${topic.id}', '${topic.content_type}')"`}>
+                    <div class="topic-item ${getTopicStatus(topic)}" ${(getTopicStatus(topic) === 'locked') ? '' : `onclick="navigateToTopic('${topic.id}', '${topic.content_type}')"`}>
                         <div class="topic-checkbox ${getTopicStatus(topic)}">
                             ${topic.completed ? '✓' : getTopicIcon(topic.content_type)}
                         </div>
@@ -770,7 +770,7 @@ function generateRoadmap() {
                             <div class="roadmap-topics">
                                 ${module.topics.map(topic => {
                                     const topicStatus = getTopicStatus(topic);
-                                    return `<span class="roadmap-topic ${topicStatus}" ${topicStatus === 'available' ? `onclick="navigateToTopic('${topic.id}', '${topic.content_type}')"` : ''}>${topic.title}</span>`;
+                                    return `<span class="roadmap-topic ${topicStatus}" ${topicStatus === 'available' || topicStatus === 'completed' ? `onclick="navigateToTopic('${topic.id}', '${topic.content_type}')"` : ''}>${topic.title}</span>`;
                                 }).join('')}
                             </div>
                         </div>

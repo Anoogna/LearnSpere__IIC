@@ -62,7 +62,70 @@ init_hf_models()
 @app.route('/')
 def index():
     """Home page - Dashboard"""
-    return render_template('index.html')
+    features = [
+        {
+            'title': 'Text Explanations',
+            'badge': 'All Levels',
+            'description': 'Get comprehensive explanations of any ML concept from basic fundamentals to advanced applications',
+            'list_items': [
+                {'icon': '✨', 'text': 'Adaptive difficulty levels'},
+                {'icon': '🎯', 'text': 'Interactive learning'},
+                {'icon': '📚', 'text': 'Comprehensive coverage'}
+            ],
+            'endpoint': 'text_explanation',
+            'btn_text': 'Start Learning',
+            'main_icon': '📝',
+            'btn_class': 'btn-primary',
+            'secondary_btn_text': 'Learn More'
+        },
+        {
+            'title': 'Code Generation',
+            'badge': 'Production Ready',
+            'description': 'Generate production-ready Python code with automatic dependency detection and best practices',
+            'list_items': [
+                {'icon': '⚡', 'text': 'Real-time generation'},
+                {'icon': '🛡️', 'text': 'Error handling'},
+                {'icon': '🏆', 'text': 'Best practices'}
+            ],
+            'endpoint': 'code_generation',
+            'btn_text': 'Generate Code',
+            'main_icon': '💻',
+            'btn_class': 'btn-success',
+            'secondary_btn_text': 'View Examples'
+        },
+        {
+            'title': 'Audio Learning',
+            'badge': 'Offline First',
+            'description': 'Listen to engaging audio lessons while commuting or during breaks',
+            'list_items': [
+                {'icon': '🎵', 'text': 'Clear narration'},
+                {'icon': '📱', 'text': 'Mobile friendly'},
+                {'icon': '⚡', 'text': 'Offline generation'}
+            ],
+            'endpoint': 'audio_learning',
+            'btn_text': 'Listen Now',
+            'main_icon': '🎧',
+            'btn_class': 'btn-warning',
+            'secondary_btn_text': 'Sample Audio'
+        },
+        {
+            'title': 'Visual Diagrams',
+            'badge': 'Interactive',
+            'description': 'AI-generated visual diagrams and illustrations for better understanding',
+            'list_items': [
+                {'icon': '🎨', 'text': 'Interactive diagrams'},
+                {'icon': '🧠', 'text': 'Visual explanations'},
+                {'icon': '🗺️', 'text': 'Concept mapping'}
+            ],
+            'endpoint': 'image_visualization',
+            'btn_text': 'View Diagrams',
+            'main_icon': '🎨',
+            'btn_class': 'btn-outline',
+            'secondary_btn_text': 'See Examples'
+        }
+    ]
+
+    return render_template('index.html', features=features)
 
 @app.route('/text-explanation')
 def text_explanation():
@@ -890,7 +953,13 @@ def update_progress():
                 # a quiz for this topic.
                 user_progress = get_course_progress(username)
                 score = (user_progress.get('quiz_scores') or {}).get(topic_id)
-                quiz_checkpoint = not (score is not None and float(score) >= 70)
+                
+                # Only trigger quiz if the module is completed
+                module_id = get_module_for_topic(topic_id)
+                if module_id and module_id not in user_progress.get('modules_completed', []):
+                    quiz_checkpoint = False
+                else:
+                    quiz_checkpoint = not (score is not None and float(score) >= 70)
             except Exception:
                 quiz_checkpoint = True
         return jsonify({
@@ -901,6 +970,17 @@ def update_progress():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/course-progress', methods=['GET'])
+@require_login
+def get_course_progress_data():
+    """Get user's course progress"""
+    try:
+        username = request.username
+        progress = get_course_progress(username)
+        return jsonify({'success': True, 'progress': progress})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/next-topic', methods=['GET'])
 @require_login

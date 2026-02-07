@@ -29,20 +29,28 @@ class GroqAIUtils:
         Returns:
             Structured explanation text
         """
-        prompt = f"""You are an expert ML educator. Generate a comprehensive explanation for the following topic.
+        prompt = f"""You are an expert ML educator.
 
 Topic: {topic}
 Complexity Level: {complexity_level}
 
-Please provide:
+Write a clear, learner-friendly explanation in markdown.
+
+Rules:
+- Do NOT output a code-only answer.
+- Do NOT dump full programs.
+- If you include code, limit it to a short illustrative snippet (max 10-20 lines) under an explicit "Code Snippet (Optional)" section.
+- Every section below must contain explanatory text.
+
+Include these sections (use headings):
 1. Brief Overview (2-3 sentences)
 2. Key Concepts (bullet points)
-3. Mathematical Foundation (if applicable)
-4. Practical Examples
-5. Common Misconceptions
-6. Resources for Further Learning
-
-Format the response in clear, educational markdown."""
+3. Intuition (plain-language explanation)
+4. Mathematical Foundation (only if applicable; keep concise)
+5. Practical Examples (real-world use-cases; not full code)
+6. Common Misconceptions
+7. Resources for Further Learning
+"""
         
         try:
             message = self.client.chat.completions.create(

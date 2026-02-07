@@ -6,7 +6,7 @@ import jwt
 from datetime import datetime, timedelta
 import os
 from functools import wraps
-from flask import request, jsonify, session
+from flask import request, jsonify, session, redirect, url_for
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-here')
 TOKEN_EXPIRATION_HOURS = 24
@@ -96,6 +96,18 @@ def require_login(f):
                 session['username'] = username
                 return f(*args, **kwargs)
 
-        return jsonify({'error': 'Login required'}), 401
+        # API endpoints should return JSON; page routes should redirect to signup/login
+        if request.path.startswith('/api/'):
+            return jsonify({'error': 'Login required'}), 401
+
+        # Preserve the originally requested URL so we can return after login/signup
+        try:
+            next_url = request.url
+        except Exception:
+            next_url = None
+
+        if next_url:
+            return redirect(url_for('register', next=next_url))
+        return redirect(url_for('register'))
     
     return decorated

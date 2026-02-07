@@ -10,12 +10,14 @@
     <nav class="navbar">
         <div class="navbar-container">
             <div class="navbar-brand">
-                <h1>ML Learning Assistant</h1>
+                <a href="/" style="text-decoration: none; color: inherit;"><h1>ML Learning Assistant</h1></a>
             </div>
             <div class="navbar-auth">
+                <button type="button" class="btn-nav-secondary" id="backBtn" style="display: none;" onclick="window.history.back()">Back</button>
                 <span id="userDisplay" style="display: none;">
                     <span id="currentUser" class="user-name"></span>
                 </span>
+                <a href="/progress" class="btn-nav-secondary" id="progressBtn" style="display: none;">Modules</a>
                 <a href="{{ url_for('login') }}" class="btn-nav-secondary" id="loginBtn">Login</a>
                 <a href="{{ url_for('register') }}" class="btn-nav-primary" id="registerBtn">Sign Up</a>
                 <button type="button" class="btn-nav-danger" id="logoutBtn" style="display: none;" onclick="authManager.logout()">Logout</button>

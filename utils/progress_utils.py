@@ -349,6 +349,15 @@ def reset_user_progress(username: str):
         }
         save_user_progress(progress_data)
 
+def get_module_for_topic(topic_id: str) -> str:
+    """Get the module id that contains the given topic id"""
+    course_structure = load_course_structure()
+    for module in course_structure["course"]["modules"]:
+        for topic in module["topics"]:
+            if topic["id"] == topic_id:
+                return module["id"]
+    return None
+
 def get_course_statistics() -> Dict:
     """Get overall course statistics"""
     progress_data = load_user_progress()

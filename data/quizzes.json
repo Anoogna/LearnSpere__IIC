@@ -257,5 +257,653 @@
       }
     ],
     "quiz_id": "gen_268e14bcb45a475cbffb0648de565ff9"
+  },
+  "gen_69f2f003cba343bf9cb643b14cbf3bf8": {
+    "topic": "neutral networks",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is the primary objective of a neutral network?",
+        "options": [
+          "To classify data",
+          "To cluster data",
+          "To learn from data",
+          "To predict outcomes"
+        ],
+        "correct": 2,
+        "explanation": "A neutral network learns from data by adjusting the strength of the connections between nodes.",
+        "sentiment_score": 0.9852487444877625,
+        "qa_confidence": 0.44788381457328796
+      },
+      {
+        "question": "What does a hidden layer in a neutral network represent?",
+        "options": [
+          "Input data",
+          "Output data",
+          "Abstract features",
+          "Intermediate calculations"
+        ],
+        "correct": 2,
+        "explanation": "A hidden layer in a neutral network represents abstract features learned from the input data.",
+        "sentiment_score": 0.9972445964813232,
+        "qa_confidence": 0.0031326350290328264
+      },
+      {
+        "question": "What type of data does a neutral network typically require for training?",
+        "options": [
+          "Structured data",
+          "Unstructured data",
+          "Labeled data",
+          "Unlabeled data"
+        ],
+        "correct": 3,
+        "explanation": "A neutral network typically requires labeled data for training, where the output is already known.",
+        "sentiment_score": 0.996852695941925,
+        "qa_confidence": 0.29230621457099915
+      },
+      {
+        "question": "What is the term for the process of adjusting the strength of connections in a neutral network?",
+        "options": [
+          "Forward pass",
+          "Backward pass",
+          "Weight update",
+          "Normalization"
+        ],
+        "correct": 2,
+        "explanation": "The process of adjusting the strength of connections in a neutral network is called weight update.",
+        "sentiment_score": 0.996203601360321,
+        "qa_confidence": 0.5413027437607525
+      },
+      {
+        "question": "What is a common activation function used in the output layer of a neutral network?",
+        "options": [
+          "Sigmoid",
+          "Tanh",
+          "ReLU",
+          "Softmax"
+        ],
+        "correct": 3,
+        "explanation": "Softmax is a common activation function used in the output layer of a neutral network for multi-class classification problems.",
+        "sentiment_score": 0.9987215399742126,
+        "qa_confidence": 0.8126977654392249
+      }
+    ],
+    "quiz_id": "gen_69f2f003cba343bf9cb643b14cbf3bf8"
+  },
+  "gen_a54a3490442742bb958aeecdea966373": {
+    "topic": "decision_trees",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is a Decision Tree?",
+        "options": [
+          "A type of neural network",
+          "A classification algorithm",
+          "A tree-like model that splits data",
+          "A regression algorithm"
+        ],
+        "correct": 2,
+        "explanation": "A Decision Tree is a tree-like model that splits data into subsets based on feature values.",
+        "sentiment_score": 0.97259920835495,
+        "qa_confidence": 0.25359421968460083
+      },
+      {
+        "question": "What is the goal of pruning in Decision Trees?",
+        "options": [
+          "To reduce overfitting",
+          "To increase the size of the tree",
+          "To improve model interpretability",
+          "To decrease the accuracy of the model"
+        ],
+        "correct": 0,
+        "explanation": "Pruning in Decision Trees is used to reduce overfitting by removing branches that do not contribute to the model's performance.",
+        "sentiment_score": 0.9982971549034119,
+        "qa_confidence": 0.41595858335494995
+      },
+      {
+        "question": "What is the term for the decision-making process in a Decision Tree?",
+        "options": [
+          "Node splitting",
+          "Leaf node",
+          "Tree pruning",
+          "Decision node"
+        ],
+        "correct": 3,
+        "explanation": "A decision node is a node in a Decision Tree where a decision is made to split the data into subsets.",
+        "sentiment_score": 0.9939380884170532,
+        "qa_confidence": 0.22340603172779083
+      },
+      {
+        "question": "What is the term for the root node of a Decision Tree?",
+        "options": [
+          "Leaf node",
+          "Decision node",
+          "Split node",
+          "Root node"
+        ],
+        "correct": 3,
+        "explanation": "The root node is the topmost node in a Decision Tree, where the data is first split.",
+        "sentiment_score": 0.994269609451294,
+        "qa_confidence": 0.7180486917495728
+      },
+      {
+        "question": "What is the term for the path from the root node to a leaf node in a Decision Tree?",
+        "options": [
+          "Branch",
+          "Leaf",
+          "Node",
+          "Path"
+        ],
+        "correct": 3,
+        "explanation": "A path in a Decision Tree is the sequence of nodes from the root node to a leaf node.",
+        "sentiment_score": 0.995604395866394,
+        "qa_confidence": 0.9878489375114441
+      }
+    ],
+    "quiz_id": "gen_a54a3490442742bb958aeecdea966373"
+  },
+  "gen_939e1da8eb9b468da23bca46c8ca2803": {
+    "topic": "decision_trees",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is the primary purpose of a decision tree in machine learning?",
+        "options": [
+          "To make predictions",
+          "To classify data",
+          "To cluster data",
+          "To generate random numbers"
+        ],
+        "correct": 1,
+        "explanation": "Decision trees are primarily used for classification and regression tasks.",
+        "sentiment_score": 0.9918917417526245,
+        "qa_confidence": 0.4719059467315674
+      },
+      {
+        "question": "What is the main advantage of using a decision tree?",
+        "options": [
+          "Interpretability",
+          "Scalability",
+          "Speed",
+          "Flexibility"
+        ],
+        "correct": 0,
+        "explanation": "Decision trees are easy to interpret and understand, making them a popular choice in machine learning.",
+        "sentiment_score": 0.993883490562439,
+        "qa_confidence": 0.7760387321613962
+      },
+      {
+        "question": "What is the term for the process of selecting the best feature to split on in a decision tree?",
+        "options": [
+          "Feature selection",
+          "Feature engineering",
+          "Feature extraction",
+          "Feature splitting"
+        ],
+        "correct": 3,
+        "explanation": "Feature splitting is the process of selecting the best feature to split on in a decision tree.",
+        "sentiment_score": 0.9850451350212097,
+        "qa_confidence": 0.20131924748420715
+      },
+      {
+        "question": "What is the term for the leaf nodes in a decision tree?",
+        "options": [
+          "Decision nodes",
+          "Split nodes",
+          "Leaf nodes",
+          "Root node"
+        ],
+        "correct": 2,
+        "explanation": "Leaf nodes are the final prediction or outcome in a decision tree.",
+        "sentiment_score": 0.99556964635849,
+        "qa_confidence": 0.4600180387496948
+      },
+      {
+        "question": "What is the term for overfitting in decision trees?",
+        "options": [
+          "Underfitting",
+          "Overfitting",
+          "Underlearning",
+          "Overlearning"
+        ],
+        "correct": 1,
+        "explanation": "Overfitting occurs when a decision tree is too complex and fits the training data too closely.",
+        "sentiment_score": 0.9983704686164856,
+        "qa_confidence": 0.38329313637223095
+      }
+    ],
+    "quiz_id": "gen_939e1da8eb9b468da23bca46c8ca2803"
+  },
+  "gen_a89a3a5ad7d044199367512c4c1b4989": {
+    "topic": "decision_trees",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is a decision tree?",
+        "options": [
+          "A type of neural network",
+          "A type of clustering algorithm",
+          "A tree-like model for classification and regression tasks",
+          "A type of support vector machine"
+        ],
+        "correct": 2,
+        "explanation": "Decision trees are a popular type of machine learning model that can be used for both classification and regression tasks.",
+        "sentiment_score": 0.97259920835495,
+        "qa_confidence": 0.5856770873069763
+      },
+      {
+        "question": "What is the main purpose of the ID3 algorithm in decision trees?",
+        "options": [
+          "To find the best feature to split on",
+          "To determine the optimal number of leaves in the tree",
+          "To calculate the Gini impurity for each node",
+          "To perform pruning on the tree"
+        ],
+        "correct": 0,
+        "explanation": "The ID3 algorithm is used to select the best feature to split on at each node in the decision tree.",
+        "sentiment_score": 0.9987736344337463,
+        "qa_confidence": 0.21175222098827362
+      },
+      {
+        "question": "What is the term for a decision tree that is grown in both the training and testing sets?",
+        "options": [
+          "Training tree",
+          "Pruning tree",
+          "Ensemble tree",
+          "Overfitting tree"
+        ],
+        "correct": 0,
+        "explanation": "An overfitting tree is a decision tree that is grown in both the training and testing sets, which can lead to poor performance on unseen data.",
+        "sentiment_score": 0.9409906268119812,
+        "qa_confidence": 0.6103658676147461
+      },
+      {
+        "question": "What is the purpose of a decision tree's root node?",
+        "options": [
+          "To represent the final class label",
+          "To hold the feature values that lead to the most frequent class label",
+          "To represent the topmost feature that splits the data",
+          "To contain the predicted probabilities for each class"
+        ],
+        "correct": 2,
+        "explanation": "The root node represents the topmost feature that splits the data, which is used to make predictions in the decision tree.",
+        "sentiment_score": 0.9981096982955933,
+        "qa_confidence": 0.7708451151847839
+      },
+      {
+        "question": "What is the term for the process of removing branches from a decision tree to prevent overfitting?",
+        "options": [
+          "Pruning",
+          "Thinning",
+          "Regularization",
+          "Feature selection"
+        ],
+        "correct": 0,
+        "explanation": "Pruning is the process of removing branches from a decision tree to prevent overfitting and improve the model's generalization performance.",
+        "sentiment_score": 0.9951066970825195,
+        "qa_confidence": 0.7079721956688445
+      }
+    ],
+    "quiz_id": "gen_a89a3a5ad7d044199367512c4c1b4989"
+  },
+  "gen_c2fdd1b3db1e448a8f2b970f57487a53": {
+    "topic": "decision_trees",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is the primary purpose of a decision tree in machine learning?",
+        "options": [
+          "Classification",
+          "Regression",
+          "Clustering",
+          "Dimensionality Reduction"
+        ],
+        "correct": 0,
+        "explanation": "Decision trees are primarily used for classification tasks, where they split data into subsets based on feature values to predict the target variable.",
+        "sentiment_score": 0.9918917417526245,
+        "qa_confidence": 0.9804235100746155
+      },
+      {
+        "question": "What is the term for the process of splitting a dataset into subsets based on feature values?",
+        "options": [
+          "Feature selection",
+          "Feature extraction",
+          "Splitting",
+          "Splitting the data"
+        ],
+        "correct": 2,
+        "explanation": "The process of splitting a dataset into subsets based on feature values is known as splitting.",
+        "sentiment_score": 0.9963170289993286,
+        "qa_confidence": 0.5450565218925476
+      },
+      {
+        "question": "What is the term for the final value predicted by a decision tree?",
+        "options": [
+          "Leaf node",
+          "Decision node",
+          "Root node",
+          "Target value"
+        ],
+        "correct": 3,
+        "explanation": "The final value predicted by a decision tree is known as the target value.",
+        "sentiment_score": 0.9974595904350281,
+        "qa_confidence": 0.34231919050216675
+      },
+      {
+        "question": "What is the term for the point in a decision tree where a feature is used to split the data?",
+        "options": [
+          "Leaf node",
+          "Decision node",
+          "Root node",
+          "Splitting point"
+        ],
+        "correct": 1,
+        "explanation": "The point in a decision tree where a feature is used to split the data is known as a decision node.",
+        "sentiment_score": 0.996504545211792,
+        "qa_confidence": 0.5327383601397742
+      },
+      {
+        "question": "What is the term for a decision tree that is grown to its maximum possible size?",
+        "options": [
+          "Pruned tree",
+          "Unpruned tree",
+          "Overfitting tree",
+          "Underfitting tree"
+        ],
+        "correct": 1,
+        "explanation": "A decision tree that is grown to its maximum possible size is known as an unpruned tree.",
+        "sentiment_score": 0.9795932769775391,
+        "qa_confidence": 0.6086231470108032
+      }
+    ],
+    "quiz_id": "gen_c2fdd1b3db1e448a8f2b970f57487a53"
+  },
+  "gen_db417368e63c441bacc42600b9abc1c7": {
+    "topic": "what_is_ml",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is Machine Learning?",
+        "options": [
+          "A type of programming language",
+          "A field of artificial intelligence",
+          "A type of data analysis",
+          "A type of software development"
+        ],
+        "correct": 1,
+        "explanation": "Machine Learning is a subfield of artificial intelligence that focuses on developing algorithms and statistical models that allow computers to learn from data, rather than following a set of hand-coded instructions.",
+        "sentiment_score": 0.99442458152771,
+        "qa_confidence": 0.49026042222976685
+      },
+      {
+        "question": "What do machines learn in Machine Learning?",
+        "options": [
+          "How to solve a mathematical equation",
+          "How to recognize patterns in data",
+          "How to play a game",
+          "How to read a book"
+        ],
+        "correct": 1,
+        "explanation": "In Machine Learning, machines learn to recognize patterns in data, make predictions, or classify objects based on that data.",
+        "sentiment_score": 0.9754437208175659,
+        "qa_confidence": 0.40543606877326965
+      },
+      {
+        "question": "What type of data is used in Machine Learning?",
+        "options": [
+          "Only numerical data",
+          "Only categorical data",
+          "A combination of numerical and categorical data",
+          "Only text data"
+        ],
+        "correct": 2,
+        "explanation": "Machine Learning algorithms can handle a variety of data types, including numerical, categorical, text, and image data.",
+        "sentiment_score": 0.9983459711074829,
+        "qa_confidence": 0.1189282089471817
+      },
+      {
+        "question": "What is the goal of a Machine Learning model?",
+        "options": [
+          "To make a prediction",
+          "To classify an object",
+          "To optimize a function",
+          "To generate new data"
+        ],
+        "correct": 0,
+        "explanation": "The primary goal of a Machine Learning model is to make accurate predictions or classify objects based on the input data.",
+        "sentiment_score": 0.9951539039611816,
+        "qa_confidence": 0.4760681092739105
+      },
+      {
+        "question": "What is overfitting in Machine Learning?",
+        "options": [
+          "When a model is too simple to fit the data",
+          "When a model is too complex and fits the noise in the data",
+          "When a model is not complex enough to fit the data",
+          "When a model is too slow to fit the data"
+        ],
+        "correct": 1,
+        "explanation": "Overfitting occurs when a Machine Learning model is too complex and fits the noise in the training data, rather than the underlying patterns.",
+        "sentiment_score": 0.9992645382881165,
+        "qa_confidence": 0.08051327615976334
+      }
+    ],
+    "quiz_id": "gen_db417368e63c441bacc42600b9abc1c7"
+  },
+  "gen_1c3343f2928742f99516532141b737ad": {
+    "topic": "decision_trees",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is the main purpose of a decision tree?",
+        "options": [
+          "To classify data",
+          "To perform regression",
+          "To cluster data",
+          "To perform dimensionality reduction"
+        ],
+        "correct": 0,
+        "explanation": "Decision trees are primarily used for classification tasks, where the goal is to predict a class or label for a given observation.",
+        "sentiment_score": 0.9955962300300598,
+        "qa_confidence": 0.5074051022529602
+      },
+      {
+        "question": "What is the term for a decision tree that can handle multiple classes?",
+        "options": [
+          "Decision Forest",
+          "Random Forest",
+          "Multi-Decision Tree",
+          "Multi-Class Tree"
+        ],
+        "correct": 0,
+        "explanation": "A multi-class tree is a type of decision tree that can handle multiple classes by using techniques such as one-vs-all or all-vs-all.",
+        "sentiment_score": 0.9885082840919495,
+        "qa_confidence": 0.8133563995361328
+      },
+      {
+        "question": "Which of the following is a common method for pruning a decision tree?",
+        "options": [
+          "Cost complexity pruning",
+          "Post pruning",
+          "Pre pruning",
+          "All of the above"
+        ],
+        "correct": 3,
+        "explanation": "All of the above methods are commonly used for pruning a decision tree. Cost complexity pruning, post pruning, and pre pruning are all techniques used to reduce the size of a decision tree while maintaining its accuracy.",
+        "sentiment_score": 0.9989223480224609,
+        "qa_confidence": 0.003259713528677821
+      },
+      {
+        "question": "What is the term for a node in a decision tree that has no children?",
+        "options": [
+          "Leaf node",
+          "Internal node",
+          "Root node",
+          "Decision node"
+        ],
+        "correct": 0,
+        "explanation": "A leaf node is a node in a decision tree that has no children. It represents a class or a decision that is made in the tree.",
+        "sentiment_score": 0.9959313273429871,
+        "qa_confidence": 0.7734233736991882
+      },
+      {
+        "question": "Which of the following is a common algorithm used for building decision trees?",
+        "options": [
+          "ID3",
+          "C4.5",
+          "CART",
+          "All of the above"
+        ],
+        "correct": 3,
+        "explanation": "ID3, C4.5, and CART are all algorithms used for building decision trees. ID3 is a simple algorithm that uses entropy to split the data, C4.5 is an extension of ID3 that uses gain ratio, and CART is a popular algorithm that uses Gini impurity.",
+        "sentiment_score": 0.9982616305351257,
+        "qa_confidence": 0.8106384101556614
+      }
+    ],
+    "quiz_id": "gen_1c3343f2928742f99516532141b737ad"
+  },
+  "gen_0dc0801c95d8447fad8c83b93364c31f": {
+    "topic": "decision_trees",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is the primary goal of a decision tree?",
+        "options": [
+          "To minimize the number of parameters",
+          "To minimize the number of features",
+          "To classify data into different classes",
+          "To regress continuous data"
+        ],
+        "correct": 2,
+        "explanation": "Decision trees are primarily used for classification tasks, although they can also be used for regression tasks.",
+        "sentiment_score": 0.9789324402809143,
+        "qa_confidence": 0.627160906791687
+      },
+      {
+        "question": "What is the term for the splitting process in decision trees?",
+        "options": [
+          "Pruning",
+          "Splitting",
+          "Leaf node",
+          "Decision node"
+        ],
+        "correct": 1,
+        "explanation": "Splitting is the process of dividing the data into smaller subsets based on a particular feature.",
+        "sentiment_score": 0.9945013523101807,
+        "qa_confidence": 0.7038766149489675
+      },
+      {
+        "question": "What is the term for the final predicted outcome of a decision tree?",
+        "options": [
+          "Root node",
+          "Decision node",
+          "Leaf node",
+          "Decision value"
+        ],
+        "correct": 2,
+        "explanation": "A leaf node is the final predicted outcome of a decision tree.",
+        "sentiment_score": 0.9966224431991577,
+        "qa_confidence": 0.4390343427658081
+      },
+      {
+        "question": "What is the term for the process of stopping the growth of a decision tree?",
+        "options": [
+          "Pruning",
+          "Splitting",
+          "Leaf node",
+          "Decision node"
+        ],
+        "correct": 0,
+        "explanation": "Pruning is the process of stopping the growth of a decision tree when it starts to overfit the training data.",
+        "sentiment_score": 0.9944373369216919,
+        "qa_confidence": 0.7459716059820494
+      },
+      {
+        "question": "What is the term for a decision tree that is grown to its maximum size before pruning?",
+        "options": [
+          "Overfitting tree",
+          "Underfitting tree",
+          "Decision tree",
+          "Unpruned tree"
+        ],
+        "correct": 3,
+        "explanation": "An unpruned tree is a decision tree that is grown to its maximum size before pruning.",
+        "sentiment_score": 0.9924747347831726,
+        "qa_confidence": 0.5156142711639404
+      }
+    ],
+    "quiz_id": "gen_0dc0801c95d8447fad8c83b93364c31f"
+  },
+  "gen_738e10f69f3a4b6caf641710e786f35c": {
+    "topic": "what_is_ml",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is Machine Learning?",
+        "options": [
+          "A field of study that focuses on human learning",
+          "A field of study that focuses on artificial intelligence",
+          "A field of study that focuses on data analysis",
+          "A field of study that focuses on computer science"
+        ],
+        "correct": 1,
+        "explanation": "Machine Learning is a field of study that focuses on artificial intelligence, which allows computer systems to learn and improve from experience without being explicitly programmed.",
+        "sentiment_score": 0.99442458152771,
+        "qa_confidence": 0.6672001481056213
+      },
+      {
+        "question": "What is the primary goal of Machine Learning?",
+        "options": [
+          "To understand human behavior",
+          "To make predictions or decisions based on data",
+          "To improve the performance of a computer system",
+          "To automate tasks"
+        ],
+        "correct": 1,
+        "explanation": "The primary goal of Machine Learning is to make predictions or decisions based on data, which is achieved through a variety of algorithms and techniques.",
+        "sentiment_score": 0.9582309722900391,
+        "qa_confidence": 0.7328393459320068
+      },
+      {
+        "question": "What type of data is commonly used in Machine Learning?",
+        "options": [
+          "Structured data only",
+          "Unstructured data only",
+          "Both structured and unstructured data",
+          "Neither structured nor unstructured data"
+        ],
+        "correct": 2,
+        "explanation": "Machine Learning often involves the use of both structured and unstructured data, which can include images, text, audio, and more.",
+        "sentiment_score": 0.9975547194480896,
+        "qa_confidence": 0.14686492085456848
+      },
+      {
+        "question": "What is Supervised Learning?",
+        "options": [
+          "A type of Machine Learning where the computer system is given a goal to achieve",
+          "A type of Machine Learning where the computer system is given a dataset and asked to make predictions",
+          "A type of Machine Learning where the computer system is given a reward for achieving a goal",
+          "A type of Machine Learning where the computer system is given a penalty for failing to achieve a goal"
+        ],
+        "correct": 1,
+        "explanation": "Supervised Learning is a type of Machine Learning where the computer system is given a dataset and asked to make predictions, based on the relationship between the input data and the target output.",
+        "sentiment_score": 0.9915858507156372,
+        "qa_confidence": 0.49539217352867126
+      },
+      {
+        "question": "What is the difference between Machine Learning and Deep Learning?",
+        "options": [
+          "Machine Learning is a subset of Deep Learning",
+          "Machine Learning is a type of Deep Learning",
+          "Machine Learning is a separate field of study that focuses on simpler algorithms",
+          "Machine Learning is a separate field of study that focuses on more complex algorithms"
+        ],
+        "correct": 3,
+        "explanation": "Machine Learning is a separate field of study that focuses on simpler algorithms, whereas Deep Learning is a subset of Machine Learning that focuses on more complex algorithms, such as neural networks.",
+        "sentiment_score": 0.9101282954216003,
+        "qa_confidence": 0.014502769336104393
+      }
+    ],
+    "quiz_id": "gen_738e10f69f3a4b6caf641710e786f35c"
   }
 }

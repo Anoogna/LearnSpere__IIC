@@ -64,173 +64,43 @@
         </div>
         
         <div class="modalities-grid">
+            {% for feature in features %}
             <div class="modality-card">
                 <div class="modality-header">
                     <div class="modality-icon-wrapper">
-                        <div class="modality-icon">📝</div>
+                        <div class="modality-icon">{{ feature.main_icon }}</div>
                         <div class="icon-glow"></div>
                     </div>
                     <div class="modality-meta">
-                        <h3>Text Explanations</h3>
-                        <span class="difficulty-badge">All Levels</span>
+                        <h3>{{ feature.title }}</h3>
+                        <span class="difficulty-badge">{{ feature.badge }}</span>
                     </div>
                 </div>
                 
                 <div class="modality-content">
-                    <p class="modality-description">Get comprehensive explanations of any ML concept from basic fundamentals to advanced applications</p>
+                    <p class="modality-description">{{ feature.description }}</p>
                     
                     <div class="feature-list">
+                        {% for item in feature.list_items %}
                         <div class="feature-item">
-                            <span class="feature-icon">✨</span>
-                            <span>Adaptive difficulty levels</span>
+                            <span class="feature-icon">{{ item.icon }}</span>
+                            <span>{{ item.text }}</span>
                         </div>
-                        <div class="feature-item">
-                            <span class="feature-icon">🎯</span>
-                            <span>Interactive learning</span>
-                        </div>
-                        <div class="feature-item">
-                            <span class="feature-icon">📚</span>
-                            <span>Comprehensive coverage</span>
-                        </div>
+                        {% endfor %}
                     </div>
                     
                     <div class="modality-actions">
-                        <a href="/text-explanation" class="btn btn-primary">
+                        <a href="{{ url_for(feature.endpoint) }}" class="btn {{ feature.btn_class }}">
                             <span class="btn-icon">
-                                <span class="icon">📝</span>
-                                Start Learning
+                                <span class="icon">{{ feature.main_icon }}</span>
+                                {{ feature.btn_text }}
                             </span>
                         </a>
-                        <button class="btn btn-ghost btn-sm">Learn More</button>
+                        <button class="btn btn-ghost btn-sm">{{ feature.secondary_btn_text }}</button>
                     </div>
                 </div>
             </div>
-            
-            <div class="modality-card">
-                <div class="modality-header">
-                    <div class="modality-icon-wrapper">
-                        <div class="modality-icon">💻</div>
-                        <div class="icon-glow"></div>
-                    </div>
-                    <div class="modality-meta">
-                        <h3>Code Generation</h3>
-                        <span class="difficulty-badge">Production Ready</span>
-                    </div>
-                </div>
-                
-                <div class="modality-content">
-                    <p class="modality-description">Generate production-ready Python code with automatic dependency detection and best practices</p>
-                    
-                    <div class="feature-list">
-                        <div class="feature-item">
-                            <span class="feature-icon">⚡</span>
-                            <span>Real-time generation</span>
-                        </div>
-                        <div class="feature-item">
-                            <span class="feature-icon">🛡️</span>
-                            <span>Error handling</span>
-                        </div>
-                        <div class="feature-item">
-                            <span class="feature-icon">🏆</span>
-                            <span>Best practices</span>
-                        </div>
-                    </div>
-                    
-                    <div class="modality-actions">
-                        <a href="/code-generation" class="btn btn-success">
-                            <span class="btn-icon">
-                                <span class="icon">💻</span>
-                                Generate Code
-                            </span>
-                        </a>
-                        <button class="btn btn-ghost btn-sm">View Examples</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="modality-card">
-                <div class="modality-header">
-                    <div class="modality-icon-wrapper">
-                        <div class="modality-icon">�</div>
-                        <div class="icon-glow"></div>
-                    </div>
-                    <div class="modality-meta">
-                        <h3>Audio Learning</h3>
-                        <span class="difficulty-badge">Offline First</span>
-                    </div>
-                </div>
-                
-                <div class="modality-content">
-                    <p class="modality-description">Listen to engaging audio lessons while commuting or during breaks</p>
-                    
-                    <div class="feature-list">
-                        <div class="feature-item">
-                            <span class="feature-icon">🎵</span>
-                            <span>Clear narration</span>
-                        </div>
-                        <div class="feature-item">
-                            <span class="feature-icon">📱</span>
-                            <span>Mobile friendly</span>
-                        </div>
-                        <div class="feature-item">
-                            <span class="feature-icon">⚡</span>
-                            <span>Offline generation</span>
-                        </div>
-                    </div>
-                    
-                    <div class="modality-actions">
-                        <a href="/audio-learning" class="btn btn-warning">
-                            <span class="btn-icon">
-                                <span class="icon">🎧</span>
-                                Listen Now
-                            </span>
-                        </a>
-                        <button class="btn btn-ghost btn-sm">Sample Audio</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="modality-card">
-                <div class="modality-header">
-                    <div class="modality-icon-wrapper">
-                        <div class="modality-icon">�</div>
-                        <div class="icon-glow"></div>
-                    </div>
-                    <div class="modality-meta">
-                        <h3>Visual Diagrams</h3>
-                        <span class="difficulty-badge">Interactive</span>
-                    </div>
-                </div>
-                
-                <div class="modality-content">
-                    <p class="modality-description">AI-generated visual diagrams and illustrations for better understanding</p>
-                    
-                    <div class="feature-list">
-                        <div class="feature-item">
-                            <span class="feature-icon">🎨</span>
-                            <span>Interactive diagrams</span>
-                        </div>
-                        <div class="feature-item">
-                            <span class="feature-icon">🧠</span>
-                            <span>Visual explanations</span>
-                        </div>
-                        <div class="feature-item">
-                            <span class="feature-icon">🗺️</span>
-                            <span>Concept mapping</span>
-                        </div>
-                    </div>
-                    
-                    <div class="modality-actions">
-                        <a href="/image-visualization" class="btn btn-outline">
-                            <span class="btn-icon">
-                                <span class="icon">�</span>
-                                View Diagrams
-                            </span>
-                        </a>
-                        <button class="btn btn-ghost btn-sm">See Examples</button>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     <!-- Advanced Features Section -->
     <section class="advanced-features">
@@ -426,8 +296,6 @@
         </div>
     </section>
 </div>
-
-{% endblock %}
 
 <style>
 /* ========================================
@@ -695,6 +563,19 @@
     margin-bottom: 4rem;
 }
 
+ .modalities-grid {
+     display: grid;
+     grid-template-columns: repeat(4, minmax(0, 1fr));
+     gap: 2rem;
+     align-items: stretch;
+ }
+
+ @media (max-width: 1200px) {
+     .modalities-grid {
+         grid-template-columns: repeat(2, minmax(0, 1fr));
+     }
+ }
+
 .section-header {
     display: flex;
     justify-content: space-between;
@@ -745,6 +626,8 @@
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+     display: flex;
+     flex-direction: column;
 }
 
 .modality-card::before {
@@ -837,6 +720,7 @@
 
 .modality-content {
     margin-bottom: 2rem;
+     flex: 1;
 }
 
 .modality-description {
@@ -879,6 +763,7 @@
     gap: 1rem;
     align-items: center;
     flex-wrap: wrap;
+     margin-top: auto;
 }
 
 /* Responsive Design */
@@ -2058,6 +1943,8 @@ p {
 .modality-card:nth-child(4) { animation-delay: 0.4s; }
 </style>
 
+{% endblock %}
+
 {% block scripts %}
 <script>
 let courseModules = null;
@@ -2135,6 +2022,10 @@ function renderCourseModules() {
                         `).join('')}
                         ${module.topics.length > 3 ? `<div class="topic-item">... and ${module.topics.length - 3} more</div>` : ''}
                     </div>
+                </div>
+
+                <div class="module-actions">
+                    <a href="/progress" class="btn btn-secondary">View Previous Modules</a>
                 </div>
             </div>
         `;

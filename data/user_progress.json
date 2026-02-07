@@ -29,16 +29,16 @@
         "decision_trees"
       ],
       "quiz_scores": {
-        "neutral networks": 20.0,
+        "neutral networks": 40.0,
         "decision_trees": 20.0
       },
       "current_module": "data_preprocessing",
       "current_topic": "decision_trees",
       "total_time_spent": 2,
-      "last_activity": "2026-02-06T22:45:13.855044",
+      "last_activity": "2026-02-07T07:42:42.373771",
       "modality_usage": {
-        "text": 7,
-        "code": 6,
+        "text": 9,
+        "code": 11,
         "audio": 0,
         "image": 0
       },
@@ -160,20 +160,136 @@
           "completed": false,
           "time_spent": 0,
           "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T06:52:33.057379",
+          "topic_id": "neutral networks",
+          "event": "quiz_submitted",
+          "score": 40.0,
+          "passed": false
+        },
+        {
+          "ts": "2026-02-07T07:03:46.525523",
+          "topic_id": "decision_trees",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "code"
+        },
+        {
+          "ts": "2026-02-07T07:05:25.658588",
+          "topic_id": "decision_trees",
+          "event": "quiz_submitted",
+          "score": 40.0,
+          "passed": false
+        },
+        {
+          "ts": "2026-02-07T07:05:27.035363",
+          "topic_id": "decision_trees",
+          "event": "error_teaching_requested",
+          "completed": false,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T07:05:42.529842",
+          "topic_id": "decision_trees",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "code"
+        },
+        {
+          "ts": "2026-02-07T07:06:06.619378",
+          "topic_id": "decision_trees",
+          "event": "quiz_submitted",
+          "score": 20.0,
+          "passed": false
+        },
+        {
+          "ts": "2026-02-07T07:06:08.140679",
+          "topic_id": "decision_trees",
+          "event": "error_teaching_requested",
+          "completed": false,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T07:19:15.733153",
+          "topic_id": "decision_trees",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "code"
+        },
+        {
+          "ts": "2026-02-07T07:41:54.701110",
+          "topic_id": "decision_trees",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "code"
+        },
+        {
+          "ts": "2026-02-07T07:42:42.373771",
+          "topic_id": "decision_trees",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "code"
         }
       ],
       "error_patterns": {
         "neutral networks": {
-          "attempts": 1,
-          "failures": 1,
-          "last_score": 20.0
+          "attempts": 2,
+          "failures": 2,
+          "last_score": 40.0
         },
         "decision_trees": {
-          "attempts": 1,
-          "failures": 1,
+          "attempts": 3,
+          "failures": 3,
           "last_score": 20.0
         }
       }
+    },
+    "user2": {
+      "username": "user2",
+      "started_at": "2026-02-07T07:00:33.945824",
+      "modules_completed": [],
+      "topics_completed": [
+        "what_is_ml"
+      ],
+      "quiz_scores": {},
+      "current_module": "ml_basics",
+      "current_topic": "what_is_ml",
+      "total_time_spent": 0,
+      "last_activity": "2026-02-07T08:13:16.425406",
+      "modality_usage": {
+        "text": 1,
+        "code": 0,
+        "audio": 0,
+        "image": 0
+      },
+      "interaction_history": [
+        {
+          "ts": "2026-02-07T08:13:16.425406",
+          "topic_id": "what_is_ml",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        }
+      ]
+    },
+    "User": {
+      "username": "User",
+      "started_at": "2026-02-07T07:31:03.542554",
+      "modules_completed": [],
+      "topics_completed": [],
+      "current_module": null,
+      "current_topic": null,
+      "total_time_spent": 0,
+      "last_activity": "2026-02-07T07:31:03.542554"
     }
   }
 }
