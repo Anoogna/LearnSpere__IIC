@@ -173,9 +173,7 @@ const textExplanationModule = {
 
             try {
                 const data = await resp.json();
-                if (data && data.quiz_checkpoint && data.quiz_topic_id) {
-                    window.location.href = `/quiz/${encodeURIComponent(data.quiz_topic_id)}`;
-                }
+                // Removed auto-navigation to quiz
             } catch (e) {
                 // ignore
             }

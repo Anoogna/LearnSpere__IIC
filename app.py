@@ -1329,6 +1329,25 @@ def progress_dashboard():
 @require_login
 def quiz_page(topic):
     """Quiz page for a specific topic"""
+    username = request.username
+    progress = get_course_progress(username)
+    
+    # Inline get_module_for_topic with validation
+    with open('data/course_structure.json', 'r') as f:
+        course_structure = json.load(f)
+    module_id = None
+    for module in course_structure["course"]["modules"]:
+        for t in module["topics"]:
+            if t["id"] == topic:
+                module_id = module["id"]
+                break
+        if module_id:
+            break
+    if not module_id:
+        abort(404)
+    
+    if module_id and module_id not in progress.get('modules_completed', []):
+        return redirect(url_for('progress_dashboard'))
     return render_template('quiz.html', topic=topic)
 
 # ============================================

@@ -255,17 +255,21 @@
     "user2": {
       "username": "user2",
       "started_at": "2026-02-07T07:00:33.945824",
-      "modules_completed": [],
+      "modules_completed": [
+        "ml_basics"
+      ],
       "topics_completed": [
-        "what_is_ml"
+        "what_is_ml",
+        "data_types",
+        "ml_workflow"
       ],
       "quiz_scores": {},
       "current_module": "ml_basics",
-      "current_topic": "what_is_ml",
+      "current_topic": "ml_workflow",
       "total_time_spent": 0,
-      "last_activity": "2026-02-07T08:13:16.425406",
+      "last_activity": "2026-02-07T08:23:36.432187",
       "modality_usage": {
-        "text": 1,
+        "text": 3,
         "code": 0,
         "audio": 0,
         "image": 0
@@ -274,6 +278,22 @@
         {
           "ts": "2026-02-07T08:13:16.425406",
           "topic_id": "what_is_ml",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T08:23:31.148576",
+          "topic_id": "data_types",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T08:23:36.432187",
+          "topic_id": "ml_workflow",
           "event": "generated",
           "completed": true,
           "time_spent": 0,
