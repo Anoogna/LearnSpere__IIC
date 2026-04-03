@@ -12,7 +12,16 @@ class GroqAIUtils:
     def __init__(self, api_key: Optional[str] = None):
         """Initialize Groq AI with API key"""
         self.api_key = api_key or os.getenv('GROQ_API_KEY')
-        self.client = Groq(api_key=self.api_key)
+        self.client = None
+        self.model = "llama-3.1-8b-instant"  # Add missing model attribute
+        
+        if not self.api_key:
+            raise ValueError("GROQ_API_KEY environment variable is required but not set")
+        
+        try:
+            self.client = Groq(api_key=self.api_key)
+        except Exception as e:
+            raise ValueError(f"Failed to initialize Groq client: {str(e)}")
         
     def generate_text_explanation(self, topic: str, complexity_level: str = "Intermediate") -> str:
         """
@@ -472,6 +481,58 @@ Rules:
             return sorted(list(set(detected)))
         except SyntaxError:
             return []
+    
+    def generate_quiz(self, topic: str, difficulty: str = "Intermediate", num_questions: int = 5) -> str:
+        """
+        Generate quiz questions in JSON format
+        Args:
+            topic: Topic for the quiz
+            difficulty: Difficulty level (Beginner, Intermediate, Advanced)
+            num_questions: Number of questions to generate
+        Returns:
+            JSON formatted string with quiz questions
+        """
+        if not self.client:
+            raise ValueError("Groq client not initialized. Please check API key.")
+        
+        prompt = f"""Return ONLY valid JSON (no markdown, no backticks, no extra text).
+
+Generate exactly {num_questions} multiple-choice questions for a {difficulty} level quiz on "{topic}" in Machine Learning.
+
+JSON schema:
+{{
+  "topic": "{topic}",
+  "difficulty": "{difficulty}",
+  "questions": [
+    {{
+      "question": "... ?",
+      "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+      "correct": 0,
+      "explanation": "..."
+    }}
+  ]
+}}
+
+Rules:
+- "correct" must be an integer index 0-3 corresponding to "options".
+- "options" must contain exactly 4 strings.
+- Each question must be unique and relevant to the topic.
+- Questions should be appropriate for {difficulty} level.
+"""
+        
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": "You are an expert ML educator creating quiz questions."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,
+                max_tokens=2000
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            raise Exception(f"Error generating quiz: {str(e)}")
 
 # Create global instance
 groq_utils = None
@@ -482,17 +543,22 @@ def init_groq(api_key: Optional[str] = None):
     groq_utils = GroqAIUtils(api_key)
 
 def get_groq():
-<<<<<<< HEAD
-    """Get the global Groq utility instance"""
-=======
-    """Get the Groq utility instance"""
+    """Get or initialize the global Groq utility instance.
+
+    Always returns a `GroqAIUtils` instance. If an API key is not set or
+    initialization fails, returns an instance with client=None and methods
+    will handle API unavailability gracefully.
+    """
     global groq_utils
     if groq_utils is None:
-        # Initialize with API key from environment
-        api_key = os.getenv('GROQ_API_KEY')
-        if not api_key:
-            print("[ERROR] GROQ_API_KEY environment variable not set")
-            print("Please set the GROQ_API_KEY environment variable")
-            return None
-        groq_utils = GroqAIUtils(api_key)
+        try:
+            api_key = os.getenv('GROQ_API_KEY')
+            groq_utils = GroqAIUtils(api_key)
+        except ValueError as e:
+            print(f"[WARN] Groq initialization failed: {e}")
+            # Create a fallback instance with client=None
+            groq_utils = GroqAIUtils.__new__(GroqAIUtils)
+            groq_utils.api_key = None
+            groq_utils.client = None
+            groq_utils.model = "llama-3.1-8b-instant"
     return groq_utils

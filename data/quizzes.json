@@ -977,5 +977,837 @@
       }
     ],
     "quiz_id": "gen_170c57c8074343f4b7160bdef865ed8b"
+  },
+  "gen_10d33204f23a4385a206e47dfba031ad": {
+    "topic": "networks",
+    "difficulty": "Intermediate",
+    "questions": [
+      {
+        "question": "What is the primary purpose of a fully connected (dense) neural network?",
+        "options": [
+          "It is used for image classification",
+          "It is used for natural language processing",
+          "Every neuron is connected to every other neuron",
+          "It is used for speech recognition"
+        ],
+        "correct": 2,
+        "explanation": "A fully connected neural network, also known as a dense neural network, is a type of neural network where every neuron is connected to every other neuron. This allows for the exchange of information between all neurons, making it a powerful tool for complex tasks.",
+        "sentiment_score": 0.9940910935401917,
+        "qa_confidence": 0.4364801049232483
+      },
+      {
+        "question": "What is the main advantage of using a convolutional neural network (CNN) over a fully connected network?",
+        "options": [
+          "It requires less training data",
+          "It is faster to train",
+          "It can efficiently process data with grid-like topology",
+          "It is more interpretable"
+        ],
+        "correct": 2,
+        "explanation": "Convolutional neural networks (CNNs) are particularly well-suited for image and signal processing tasks, where the input data has a grid-like topology. This allows CNNs to efficiently process large amounts of data with a significant reduction in parameters and computational requirements.",
+        "sentiment_score": 0.9951574206352234,
+        "qa_confidence": 0.45482704043388367
+      },
+      {
+        "question": "What is the term for the process of training a neural network on a subset of the data and then testing it on the remaining data?",
+        "options": [
+          "Cross-validation",
+          "Overfitting",
+          "Underfitting",
+          "Holdout method"
+        ],
+        "correct": 3,
+        "explanation": "The holdout method is a simple technique for evaluating a model's performance, where a subset of the data is used for training and the remaining data is used for testing. This helps to avoid overfitting and get a more realistic estimate of the model's performance.",
+        "sentiment_score": 0.994038462638855,
+        "qa_confidence": 0.32894065976142883
+      },
+      {
+        "question": "What type of neural network is commonly used for sequential data, such as time series or text data?",
+        "options": [
+          "Recurrent neural network (RNN)",
+          "Long short-term memory (LSTM) network",
+          "Autoencoder",
+          "Generative adversarial network (GAN)"
+        ],
+        "correct": 0,
+        "explanation": "Recurrent neural networks (RNNs) are designed to handle sequential data by maintaining an internal state that captures the temporal dependencies between input elements. This makes RNNs particularly well-suited for tasks such as language modeling or speech recognition.",
+        "sentiment_score": 0.9965697526931763,
+        "qa_confidence": 0.6793638641538564
+      },
+      {
+        "question": "What is the term for the phenomenon where a model performs well on the training data but poorly on new, unseen data?",
+        "options": [
+          "Overfitting",
+          "Underfitting",
+          "Bias-Variance tradeoff",
+          "Concept drift"
+        ],
+        "correct": 0,
+        "explanation": "Overfitting occurs when a model is too complex and fits the noise in the training data, resulting in poor performance on new, unseen data. This is a common problem in machine learning and can be mitigated using techniques such as regularization and cross-validation.",
+        "sentiment_score": 0.9995321035385132,
+        "qa_confidence": 0.21708525717258453
+      }
+    ],
+    "quiz_id": "gen_10d33204f23a4385a206e47dfba031ad"
+  },
+  "gen_74db858710944165b93d15f64e884705": {
+    "topic": "neural networks",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is the primary function of the input layer in a neural network?",
+        "options": [
+          "To process the output",
+          "To process the input data",
+          "To store the model's weights",
+          "To generate the final output"
+        ],
+        "correct": 1,
+        "explanation": "The input layer is responsible for receiving and processing the input data that is used to train the neural network.",
+        "sentiment_score": 0.9893724322319031,
+        "qa_confidence": 0.7134093642234802
+      },
+      {
+        "question": "What is the term for a hidden layer with a sigmoid activation function that outputs a probability?",
+        "options": [
+          "Sigmoid layer",
+          "Rectified Linear Unit (ReLU) layer",
+          "Softmax layer",
+          "Dense layer"
+        ],
+        "correct": 0,
+        "explanation": "A sigmoid layer with a sigmoid activation function is often used to output a probability.",
+        "sentiment_score": 0.9911527037620544,
+        "qa_confidence": 0.5824638605117798
+      },
+      {
+        "question": "What is the purpose of the activation function in a neural network?",
+        "options": [
+          "To compute the model's weights",
+          "To introduce non-linearity to the model",
+          "To generate the final output",
+          "To process the input data"
+        ],
+        "correct": 1,
+        "explanation": "Activation functions are used to introduce non-linearity to the model, allowing it to learn more complex relationships between inputs and outputs.",
+        "sentiment_score": 0.9976860284805298,
+        "qa_confidence": 0.5809097290039062
+      },
+      {
+        "question": "What is a type of neural network that is particularly effective for image classification tasks?",
+        "options": [
+          "Convolutional Neural Network (CNN)",
+          "Recurrent Neural Network (RNN)",
+          "Feedforward Neural Network (FNN)",
+          "Long Short-Term Memory (LSTM)"
+        ],
+        "correct": 0,
+        "explanation": "Convolutional Neural Networks (CNNs) are particularly well-suited for image classification tasks due to their ability to extract spatial hierarchies of features.",
+        "sentiment_score": 0.562024712562561,
+        "qa_confidence": 0.5726386308670044
+      },
+      {
+        "question": "What is the term for a type of neural network that is trained with an unsupervised learning algorithm?",
+        "options": [
+          "Autoencoder",
+          "Generative Adversarial Network (GAN)",
+          "Neural Turing Machine (NTM)",
+          "Supervised Neural Network"
+        ],
+        "correct": 0,
+        "explanation": "An autoencoder is a type of neural network that is trained with an unsupervised learning algorithm, and is often used for dimensionality reduction and feature learning.",
+        "sentiment_score": 0.9965492486953735,
+        "qa_confidence": 0.2876920998096466
+      }
+    ],
+    "quiz_id": "gen_74db858710944165b93d15f64e884705"
+  },
+  "gen_c9a65fa804794c72950410ba8bdc09d8": {
+    "topic": "neural networks",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is the basic unit of computation in a Neural Network?",
+        "options": [
+          "Artificial Neuron",
+          "Artificial Brain",
+          "Artificial Intelligence",
+          "Machine Learning"
+        ],
+        "correct": 0,
+        "explanation": "An artificial neuron is the basic unit of computation in a Neural Network, similar to a biological neuron.",
+        "sentiment_score": 0.9887427091598511,
+        "qa_confidence": 0.3263494074344635
+      },
+      {
+        "question": "What is the purpose of the activation function in a neuron?",
+        "options": [
+          "To introduce non-linearity",
+          "To reduce dimensionality",
+          "To increase dimensionality",
+          "To normalize the data"
+        ],
+        "correct": 0,
+        "explanation": "The activation function introduces non-linearity to the model, allowing it to learn complex relationships between inputs and outputs.",
+        "sentiment_score": 0.9978146553039551,
+        "qa_confidence": 0.3612452447414398
+      },
+      {
+        "question": "What is the difference between a feedforward network and a recurrent network?",
+        "options": [
+          "Feedforward networks have feedback connections, while recurrent networks do not.",
+          "Recurrent networks have feedback connections, while feedforward networks do not.",
+          "Feedforward networks are used for image classification, while recurrent networks are used for text classification.",
+          "Recurrent networks are used for image classification, while feedforward networks are used for text classification."
+        ],
+        "correct": 1,
+        "explanation": "Recurrent networks have feedback connections, allowing them to maintain a hidden state and process sequential data.",
+        "sentiment_score": 0.9953972697257996,
+        "qa_confidence": 0.4073615903034806
+      },
+      {
+        "question": "What is the purpose of the bias term in a neuron?",
+        "options": [
+          "To adjust the learning rate",
+          "To introduce non-linearity",
+          "To shift the activation function",
+          "To normalize the data"
+        ],
+        "correct": 2,
+        "explanation": "The bias term shifts the activation function, allowing the model to learn the intercept of the relationship between inputs and outputs.",
+        "sentiment_score": 0.9986191987991333,
+        "qa_confidence": 0.31160080432891846
+      },
+      {
+        "question": "What is the term for the process of training a neural network with a large amount of data?",
+        "options": [
+          "Overfitting",
+          "Underfitting",
+          "Batch Gradient Descent",
+          "Deep Learning"
+        ],
+        "correct": 2,
+        "explanation": "Batch Gradient Descent is the term for the process of training a neural network with a large amount of data.",
+        "sentiment_score": 0.9768964648246765,
+        "qa_confidence": 0.9542722105979919
+      }
+    ],
+    "quiz_id": "gen_c9a65fa804794c72950410ba8bdc09d8"
+  },
+  "gen_49991ea256574ff59dcc8ed7232e8b87": {
+    "topic": "gen ai",
+    "difficulty": "Intermediate",
+    "questions": [
+      {
+        "question": "What is the primary goal of a Generative Adversarial Network (GAN)?",
+        "options": [
+          "To generate new data samples",
+          "To classify existing data samples",
+          "To cluster existing data samples",
+          "To optimize model weights"
+        ],
+        "correct": 0,
+        "explanation": "GANs are designed to generate new data samples that are similar to existing data samples.",
+        "sentiment_score": 0.9953314661979675,
+        "qa_confidence": 0.5107061862945557
+      },
+      {
+        "question": "What is the key characteristic of a Generative Model?",
+        "options": [
+          "It can only classify existing data",
+          "It can only cluster existing data",
+          "It can generate new data samples",
+          "It can only optimize model weights"
+        ],
+        "correct": 2,
+        "explanation": "Generative models can generate new data samples that are similar to existing data samples.",
+        "sentiment_score": 0.9452574849128723,
+        "qa_confidence": 0.5586434602737427
+      },
+      {
+        "question": "What is the primary difference between a Generative Model and a Discriminative Model?",
+        "options": [
+          "Generative models are slower than discriminative models",
+          "Generative models can only classify existing data",
+          "Generative models can generate new data samples",
+          "Generative models are more complex than discriminative models"
+        ],
+        "correct": 2,
+        "explanation": "Generative models are designed to generate new data samples, while discriminative models are designed to classify existing data samples.",
+        "sentiment_score": 0.9940106272697449,
+        "qa_confidence": 0.4580934941768646
+      },
+      {
+        "question": "What is a common application of Generative Adversarial Networks (GANs)?",
+        "options": [
+          "Image classification",
+          "Data clustering",
+          "Data generation",
+          "Model optimization"
+        ],
+        "correct": 2,
+        "explanation": "GANs are commonly used to generate new data samples, such as images or text.",
+        "sentiment_score": 0.9975898265838623,
+        "qa_confidence": 0.6889315843582153
+      },
+      {
+        "question": "What is the key advantage of a Variational Autoencoder (VAE) over a traditional Autoencoder?",
+        "options": [
+          "VAEs are faster than traditional autoencoders",
+          "VAEs can only compress data",
+          "VAEs can generate new data samples",
+          "VAEs can handle high-dimensional data"
+        ],
+        "correct": 2,
+        "explanation": "VAEs can generate new data samples, making them more powerful than traditional autoencoders.",
+        "sentiment_score": 0.9892548322677612,
+        "qa_confidence": 0.22080900613218546
+      }
+    ],
+    "quiz_id": "gen_49991ea256574ff59dcc8ed7232e8b87"
+  },
+  "gen_3021935037f74cd58adcdeec2ee16593": {
+    "topic": "neural networks",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is the main function of an artificial neuron in a neural network?",
+        "options": [
+          "To store data",
+          "To process data",
+          "To analyze data",
+          "To visualize data"
+        ],
+        "correct": 1,
+        "explanation": "An artificial neuron processes the input it receives, performs a computation, and then sends the output to the next layer.",
+        "sentiment_score": 0.9977715611457825,
+        "qa_confidence": 0.47460436820983887
+      },
+      {
+        "question": "What is the name of the process in a neural network where the network learns to adapt to the input data?",
+        "options": [
+          "Training",
+          "Testing",
+          "Validation",
+          "Normalization"
+        ],
+        "correct": 0,
+        "explanation": "The process of adjusting the network's parameters to fit the input data is called training.",
+        "sentiment_score": 0.9951169490814209,
+        "qa_confidence": 0.9865047634521034
+      },
+      {
+        "question": "What is a layer in a neural network where all the neurons are connected to each other?",
+        "options": [
+          "Fully Connected Layer",
+          "Convolutional Layer",
+          "Pooling Layer",
+          "Input Layer"
+        ],
+        "correct": 0,
+        "explanation": "A fully connected layer is a type of layer where all the neurons are connected to each other.",
+        "sentiment_score": 0.9793347120285034,
+        "qa_confidence": 0.6218968629837036
+      },
+      {
+        "question": "What is the purpose of activation functions in a neural network?",
+        "options": [
+          "To prevent overfitting",
+          "To introduce non-linearity",
+          "To speed up computation",
+          "To reduce dimensionality"
+        ],
+        "correct": 1,
+        "explanation": "Activation functions introduce non-linearity into the network, allowing it to learn complex relationships between inputs and outputs.",
+        "sentiment_score": 0.9975142478942871,
+        "qa_confidence": 0.3913331925868988
+      },
+      {
+        "question": "What is the term for the process of splitting the available data into a training set and a test set?",
+        "options": [
+          "Data Augmentation",
+          "Data Normalization",
+          "Data Splitting",
+          "Data Validation"
+        ],
+        "correct": 2,
+        "explanation": "Data splitting is the process of dividing the available data into a training set and a test set for training and testing the network.",
+        "sentiment_score": 0.9983910322189331,
+        "qa_confidence": 0.5061805844306946
+      }
+    ],
+    "quiz_id": "gen_3021935037f74cd58adcdeec2ee16593"
+  },
+  "gen_024844af894f48788958efdb5c6cecdd": {
+    "topic": "neural networks",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is the primary function of an artificial neural network?",
+        "options": [
+          "To perform linear regression",
+          "To classify input data",
+          "To recognize patterns in data",
+          "To perform clustering"
+        ],
+        "correct": 2,
+        "explanation": "Artificial neural networks are designed to recognize patterns in data, making them a crucial component in machine learning models.",
+        "sentiment_score": 0.9953585267066956,
+        "qa_confidence": 0.35017839074134827
+      },
+      {
+        "question": "What is the term for the process of adjusting the connection strengths in a neural network?",
+        "options": [
+          "Backpropagation",
+          "Forward propagation",
+          "Gradient Descent",
+          "Activation Function"
+        ],
+        "correct": 0,
+        "explanation": "Backpropagation is the process of adjusting the connection strengths in a neural network, allowing it to learn from its errors and improve its performance.",
+        "sentiment_score": 0.9921899437904358,
+        "qa_confidence": 0.7285609245300293
+      },
+      {
+        "question": "What is the name of the algorithm used to train neural networks with multiple layers?",
+        "options": [
+          "Sigmoid function",
+          "ReLU function",
+          "Softmax function",
+          "Feedforward Networks"
+        ],
+        "correct": 3,
+        "explanation": "Feedforward Networks are a type of neural network that uses the feedforward algorithm to train multiple layers, allowing it to learn complex patterns in data.",
+        "sentiment_score": 0.998766303062439,
+        "qa_confidence": 0.755896715563722
+      },
+      {
+        "question": "What is the purpose of the activation function in a neural network?",
+        "options": [
+          "To introduce non-linearity to the model",
+          "To reduce the dimensionality of the data",
+          "To increase the speed of the model",
+          "To reduce the size of the model"
+        ],
+        "correct": 0,
+        "explanation": "The activation function introduces non-linearity to the model, allowing it to learn complex patterns in data and making it more powerful than linear models.",
+        "sentiment_score": 0.9976860284805298,
+        "qa_confidence": 0.498933881521225
+      },
+      {
+        "question": "What is the term for the number of neurons in the input layer of a neural network?",
+        "options": [
+          "Number of hidden layers",
+          "Number of output nodes",
+          "Number of input features",
+          "Number of neurons in the input layer"
+        ],
+        "correct": 3,
+        "explanation": "The number of neurons in the input layer is a key parameter in a neural network, as it determines the amount of information that the model can process.",
+        "sentiment_score": 0.9929646253585815,
+        "qa_confidence": 0.6623693108558655
+      }
+    ],
+    "quiz_id": "gen_024844af894f48788958efdb5c6cecdd"
+  },
+  "gen_959b842f255a4ba3bad45638ac027b8d": {
+    "topic": "neural networks",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is a fundamental component of a neural network?",
+        "options": [
+          "Neuron",
+          "Synapse",
+          "Network Layer",
+          "Activation Function"
+        ],
+        "correct": 0,
+        "explanation": "A neuron is the basic computational unit in a neural network.",
+        "sentiment_score": 0.9301746487617493,
+        "qa_confidence": 0.9676816977444105
+      },
+      {
+        "question": "What is the primary purpose of a neural network's weights?",
+        "options": [
+          "To store data",
+          "To represent the network's architecture",
+          "To influence the output based on inputs",
+          "To improve the network's speed"
+        ],
+        "correct": 2,
+        "explanation": "The weights in a neural network determine how much each input contributes to the output.",
+        "sentiment_score": 0.9968131184577942,
+        "qa_confidence": 0.6078868508338928
+      },
+      {
+        "question": "What type of neural network is well-suited for tasks involving sequential data?",
+        "options": [
+          "Convolutional Neural Network (CNN)",
+          "Recurrent Neural Network (RNN)",
+          "Autoencoder",
+          "Generative Adversarial Network (GAN)"
+        ],
+        "correct": 1,
+        "explanation": "Recurrent Neural Networks are particularly effective for processing sequential data.",
+        "sentiment_score": 0.9946765899658203,
+        "qa_confidence": 0.6884915828704834
+      },
+      {
+        "question": "What is the process called when a neural network learns to represent the input data in a compressed form?",
+        "options": [
+          "Feature extraction",
+          "Dimensionality reduction",
+          "Autoencoding",
+          "Supervised learning"
+        ],
+        "correct": 2,
+        "explanation": "Autoencoding is a process where a neural network learns to represent the input data in a compressed form.",
+        "sentiment_score": 0.9980822801589966,
+        "qa_confidence": 0.2901378273963928
+      },
+      {
+        "question": "What is the term for the number of layers in a neural network?",
+        "options": [
+          "Depth",
+          "Width",
+          "Activation",
+          "Bias"
+        ],
+        "correct": 0,
+        "explanation": "The depth of a neural network refers to the number of layers it contains.",
+        "sentiment_score": 0.9902908205986023,
+        "qa_confidence": 0.9915851523401216
+      }
+    ],
+    "quiz_id": "gen_959b842f255a4ba3bad45638ac027b8d"
+  },
+  "gen_1f86b38b7cd94e9ebaf7347bd8895322": {
+    "topic": "neural networks",
+    "difficulty": "Intermediate",
+    "questions": [
+      {
+        "question": "What is the primary function of an activation function in a neural network?",
+        "options": [
+          "To adjust the learning rate of the network",
+          "To introduce nonlinearity to the model",
+          "To regularize the weights of the network",
+          "To improve the convergence of the optimizer"
+        ],
+        "correct": 1,
+        "explanation": "Activation functions are used to introduce nonlinearity to the model, allowing it to learn complex relationships between inputs and outputs.",
+        "sentiment_score": 0.9880833029747009,
+        "qa_confidence": 0.2898823916912079
+      },
+      {
+        "question": "What is the purpose of backpropagation in training neural networks?",
+        "options": [
+          "To update the weights of the network based on the loss function",
+          "To calculate the gradients of the loss function with respect to the weights",
+          "To initialize the weights of the network randomly",
+          "To normalize the inputs to the network"
+        ],
+        "correct": 1,
+        "explanation": "Backpropagation is used to calculate the gradients of the loss function with respect to the weights, which are then used to update the weights.",
+        "sentiment_score": 0.9988222718238831,
+        "qa_confidence": 0.5009697079658508
+      },
+      {
+        "question": "What is the name of the algorithm used to train deep neural networks?",
+        "options": [
+          "Stochastic Gradient Descent",
+          "Batch Gradient Descent",
+          "Adam Optimization",
+          "Backpropagation"
+        ],
+        "correct": 0,
+        "explanation": "Stochastic Gradient Descent is an algorithm used to train deep neural networks, as it is well-suited for large datasets and can handle complex models.",
+        "sentiment_score": 0.9988846182823181,
+        "qa_confidence": 0.00953956600278616
+      },
+      {
+        "question": "What is the term for the process of training a neural network on a dataset that is different from the training set?",
+        "options": [
+          "Overfitting",
+          "Underfitting",
+          "Regularization",
+          "Transfer Learning"
+        ],
+        "correct": 3,
+        "explanation": "Transfer learning is the process of training a neural network on a dataset that is different from the training set, allowing the network to generalize to new data.",
+        "sentiment_score": 0.9826546311378479,
+        "qa_confidence": 0.935038796014851
+      },
+      {
+        "question": "What is the purpose of a dropout layer in a neural network?",
+        "options": [
+          "To introduce noise to the inputs of the network",
+          "To regularize the weights of the network",
+          "To improve the convergence of the optimizer",
+          "To prevent overfitting by randomly dropping neurons"
+        ],
+        "correct": 3,
+        "explanation": "Dropout is a regularization technique that randomly drops neurons during training, preventing overfitting and improving the generalizability of the network.",
+        "sentiment_score": 0.9989485144615173,
+        "qa_confidence": 0.29464179277420044
+      }
+    ],
+    "quiz_id": "gen_1f86b38b7cd94e9ebaf7347bd8895322"
+  },
+  "gen_60524c3a9b674089852c0e824d803df8": {
+    "topic": "neural networks",
+    "difficulty": "Intermediate",
+    "questions": [
+      {
+        "question": "What is the primary purpose of the activation function in a neural network?",
+        "options": [
+          "To speed up the training process",
+          "To introduce non-linearity in the model",
+          "To handle outliers in the data",
+          "To reduce the dimensionality of the input data"
+        ],
+        "correct": 1,
+        "explanation": "Activation functions introduce non-linearity in the model, allowing it to learn complex relationships between inputs and outputs.",
+        "sentiment_score": 0.9957981705665588,
+        "qa_confidence": 0.7149724960327148
+      },
+      {
+        "question": "Which of the following is a type of neural network that is well-suited for time-series forecasting?",
+        "options": [
+          "Convolutional Neural Network (CNN)",
+          "Recurrent Neural Network (RNN)",
+          "Autoencoder",
+          "Decision Tree"
+        ],
+        "correct": 1,
+        "explanation": "RNNs are particularly well-suited for time-series forecasting due to their ability to handle sequential data.",
+        "sentiment_score": 0.9565189480781555,
+        "qa_confidence": 0.17869949340820312
+      },
+      {
+        "question": "What is the purpose of batch normalization in a neural network?",
+        "options": [
+          "To speed up the training process",
+          "To reduce the effect of internal covariate shift",
+          "To introduce noise in the input data",
+          "To increase the capacity of the model"
+        ],
+        "correct": 1,
+        "explanation": "Batch normalization reduces the effect of internal covariate shift, which can improve the stability and speed of training.",
+        "sentiment_score": 0.9990339279174805,
+        "qa_confidence": 0.52110356092453
+      },
+      {
+        "question": "Which of the following is a type of neural network that is well-suited for image classification tasks?",
+        "options": [
+          "Recurrent Neural Network (RNN)",
+          "Autoencoder",
+          "Convolutional Neural Network (CNN)",
+          "Decision Tree"
+        ],
+        "correct": 2,
+        "explanation": "CNNs are particularly well-suited for image classification tasks due to their ability to extract spatial hierarchies of features from images.",
+        "sentiment_score": 0.9616765975952148,
+        "qa_confidence": 0.19156083464622498
+      },
+      {
+        "question": "What is the purpose of regularization in a neural network?",
+        "options": [
+          "To increase the capacity of the model",
+          "To reduce the effect of overfitting",
+          "To speed up the training process",
+          "To decrease the capacity of the model"
+        ],
+        "correct": 3,
+        "explanation": "Regularization techniques, such as dropout and L1/L2 regularization, are used to decrease the capacity of the model and reduce the effect of overfitting.",
+        "sentiment_score": 0.9984328150749207,
+        "qa_confidence": 0.5278367400169373
+      }
+    ],
+    "quiz_id": "gen_60524c3a9b674089852c0e824d803df8"
+  },
+  "gen_faf4249f44504548a0b6e111fd9c8741": {
+    "topic": "gen ai",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is the primary function of a Generative Adversarial Network (GAN)?",
+        "options": [
+          "To classify images",
+          "To generate new images",
+          "To recognize speech",
+          "To translate languages"
+        ],
+        "correct": 1,
+        "explanation": "GANs are a type of deep learning model that consists of two neural networks: a generator and a discriminator. The generator creates new images, and the discriminator tries to distinguish between real and fake images.",
+        "sentiment_score": 0.9954032897949219,
+        "qa_confidence": 0.6688624024391174
+      },
+      {
+        "question": "What is the primary goal of a Variational Autoencoder (VAE)?",
+        "options": [
+          "To classify images",
+          "To generate new images",
+          "To compress data",
+          "To predict continuous values"
+        ],
+        "correct": 2,
+        "explanation": "VAEs are a type of deep learning model that learns to compress and reconstruct input data. The primary goal of a VAE is to learn a compact representation of the input data.",
+        "sentiment_score": 0.9984768033027649,
+        "qa_confidence": 0.5183970928192139
+      },
+      {
+        "question": "What is the term for a machine learning model that can generate new text, images, or music based on a given prompt?",
+        "options": [
+          "Chatbot",
+          "Neural Network",
+          "Generative Model",
+          "Deep Learning Model"
+        ],
+        "correct": 2,
+        "explanation": "A Generative Model is a type of machine learning model that can generate new data samples based on a given prompt or input.",
+        "sentiment_score": 0.9958321452140808,
+        "qa_confidence": 0.7495648860931396
+      }
+    ],
+    "quiz_id": "gen_faf4249f44504548a0b6e111fd9c8741"
+  },
+  "gen_416602cd0a9e45f4932ec01e8b3eb67c": {
+    "topic": "neural networks",
+    "difficulty": "Advanced",
+    "questions": [
+      {
+        "question": "What is the primary function of a ReLU (Rectified Linear Unit) activation function in a neural network?",
+        "options": [
+          "It helps to reduce the vanishing gradient problem in deep networks.",
+          "It introduces non-linearity in the model, allowing it to learn more complex relationships.",
+          "It is used to regularize the model by adding a penalty term to the loss function.",
+          "It is a type of convolutional layer used in image classification tasks."
+        ],
+        "correct": 1,
+        "explanation": "ReLU introduces non-linearity in the model, enabling it to learn more complex relationships between inputs and outputs.",
+        "sentiment_score": 0.9975366592407227,
+        "qa_confidence": 0.32668042182922363
+      },
+      {
+        "question": "What is the purpose of batch normalization in a neural network?",
+        "options": [
+          "To regularize the model by adding a penalty term to the loss function.",
+          "To reduce the vanishing gradient problem in deep networks.",
+          "To normalize the input data to have zero mean and unit variance.",
+          "To introduce non-linearity in the model, allowing it to learn more complex relationships."
+        ],
+        "correct": 2,
+        "explanation": "Batch normalization normalizes the input data to have zero mean and unit variance, which helps to stabilize the training process.",
+        "sentiment_score": 0.9990339279174805,
+        "qa_confidence": 0.3092905879020691
+      },
+      {
+        "question": "Which of the following is a type of neural network that is commonly used for sequential data, such as text or time series data?",
+        "options": [
+          "Convolutional Neural Network (CNN)",
+          "Recurrent Neural Network (RNN)",
+          "Autoencoder",
+          "Support Vector Machine (SVM)"
+        ],
+        "correct": 1,
+        "explanation": "RNNs are designed to handle sequential data and are commonly used for tasks such as language modeling and time series prediction.",
+        "sentiment_score": 0.993962824344635,
+        "qa_confidence": 0.2493220567703247
+      }
+    ],
+    "quiz_id": "gen_416602cd0a9e45f4932ec01e8b3eb67c"
+  },
+  "gen_68c6a440882e4cb9a99516da844eca12": {
+    "topic": "gen ai",
+    "difficulty": "Beginner",
+    "questions": [
+      {
+        "question": "What is the primary goal of Generative Adversarial Networks (GANs)?",
+        "options": [
+          "To classify images",
+          "To generate new data",
+          "To recognize objects",
+          "To compress data"
+        ],
+        "correct": 1,
+        "explanation": "GANs are a type of deep learning model that generates new data samples by learning the underlying distribution of the existing data.",
+        "sentiment_score": 0.9953237175941467,
+        "qa_confidence": 0.4725378751754761
+      },
+      {
+        "question": "What is a key characteristic of a Generative Model?",
+        "options": [
+          "It only predicts probabilities",
+          "It can generate new data",
+          "It only classifies data",
+          "It can compress data"
+        ],
+        "correct": 1,
+        "explanation": "Generative models, such as Generative Adversarial Networks (GANs) and Variational Autoencoders (VAEs), have the ability to generate new data samples.",
+        "sentiment_score": 0.934456467628479,
+        "qa_confidence": 0.7346413135528564
+      },
+      {
+        "question": "Which of the following is an example of a Generative AI technique?",
+        "options": [
+          "Reinforcement Learning",
+          "Supervised Learning",
+          "Generative Adversarial Networks",
+          "Clustering"
+        ],
+        "correct": 2,
+        "explanation": "Generative Adversarial Networks (GANs) is a type of Generative AI technique that generates new data samples by learning the underlying distribution of the existing data.",
+        "sentiment_score": 0.9940336346626282,
+        "qa_confidence": 0.5855560898780823
+      }
+    ],
+    "quiz_id": "gen_68c6a440882e4cb9a99516da844eca12"
+  },
+  "gen_2bed743a959444aa8d12541b52449db6": {
+    "topic": "gen ai",
+    "difficulty": "Intermediate",
+    "questions": [
+      {
+        "question": "What is the primary goal of Generative Adversarial Networks (GANs) in AI?",
+        "options": [
+          "To classify images into predefined categories",
+          "To generate new, synthetic data that resembles existing data",
+          "To train models on imbalanced datasets",
+          "To optimize model hyperparameters"
+        ],
+        "correct": 1,
+        "explanation": "GANs are designed to generate new, synthetic data that resembles existing data, making them useful for tasks such as data augmentation and image synthesis.",
+        "sentiment_score": 0.9921475052833557,
+        "qa_confidence": 0.4850793182849884
+      },
+      {
+        "question": "What is a key challenge in training Generative Models like Variational Autoencoders (VAEs)?",
+        "options": [
+          "High computational requirements",
+          "Difficulty in optimizing model parameters",
+          "Vanishing gradients during backpropagation",
+          "Reconstructing original input data is too easy"
+        ],
+        "correct": 3,
+        "explanation": "Reconstructing original input data is too easy in VAEs, which can lead to overfitting and poor generalization performance.",
+        "sentiment_score": 0.9860019683837891,
+        "qa_confidence": 0.9564012885093689
+      },
+      {
+        "question": "How do Conditional Generative Models differ from Unconditional Generative Models?",
+        "options": [
+          "Conditional models generate data based on user input, while unconditional models do not",
+          "Conditional models are trained on labeled datasets, while unconditional models are trained on unlabeled datasets",
+          "Conditional models use GANs, while unconditional models use VAEs",
+          "Conditional models use VAEs, while unconditional models use GANs"
+        ],
+        "correct": 0,
+        "explanation": "Conditional Generative Models generate data based on user input, whereas Unconditional Generative Models do not take any input and generate data randomly.",
+        "sentiment_score": 0.9966251850128174,
+        "qa_confidence": 0.12461023777723312
+      }
+    ],
+    "quiz_id": "gen_2bed743a959444aa8d12541b52449db6"
   }
 }

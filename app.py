@@ -4,7 +4,7 @@ ML Learning Assistant - Main Flask Application
 GyanGuru: AI Powered Learning Assistant for AI & ML
 """
 
-from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for, abort
 from flask_cors import CORS
 from datetime import datetime
 import os
@@ -14,10 +14,25 @@ import time
 from werkzeug.utils import secure_filename
 
 # Import utility modules
-from utils.genai_utils import get_groq, init_groq
+from utils.genai_utils import GroqAIUtils, get_groq, init_groq
 from utils.audio_utils import get_audio, init_audio
 from utils.image_utils import get_images, init_images
 from utils.code_executor import get_code_executor, init_code_executor
+from models.user import ensure_users_file, User
+from utils.quiz_utils import init_quiz, get_quiz_system
+from utils.hf_utils import init_hf_models, hf_manager
+from utils.auth_utils import require_login, generate_token, verify_token, token_required
+from utils.sklearn_utils import sklearn_manager
+from utils.progress_utils import (
+    get_course_progress,
+    update_topic_progress,
+    get_next_topic,
+    get_available_topics,
+    reset_user_progress,
+    get_module_for_topic,
+    get_course_statistics,
+    update_quiz_score,
+)
 import logging
 # Configure logging to file
 logging.basicConfig(
@@ -57,6 +72,17 @@ init_images()
 init_code_executor()
 init_quiz()
 init_hf_models()
+
+# Create local instances for easier use and to satisfy static analysis
+groq = get_groq() or GroqAIUtils()
+audio = get_audio()
+images = get_images()
+executor = get_code_executor()
+quiz_system = get_quiz_system()
+
+# ensure hf_manager and sklearn_manager are available
+hf = hf_manager
+sklearn_mgr = sklearn_manager
 
 # ============================================
 # STATIC FILES SERVING
@@ -301,7 +327,7 @@ def check_auth():
 @require_login
 def user_profile():
     """Get current user profile"""
-    username = request.username
+    username = getattr(request, 'username', None)
     user = User.get_by_username(username)
     
     if user:
@@ -408,7 +434,7 @@ def generate_explanation():
         if not topic:
             return jsonify({'error': 'Topic is required'}), 400
         
-        gemini = get_groq()
+        gemini = get_groq() or GroqAIUtils()
         explanation = gemini.generate_text_explanation(topic, complexity)
         print(f"[INFO] Explanation generated (first 100 chars): {explanation[:100]}...")
         
@@ -442,7 +468,7 @@ def generate_code():
         if not algorithm:
             return jsonify({'error': 'Algorithm is required'}), 400
         
-        gemini = get_groq()
+        gemini = get_groq() or GroqAIUtils()
         code = gemini.generate_code_example(algorithm, complexity)
         
         print(f"📝 Generated code length: {len(code)} characters")
@@ -525,7 +551,8 @@ def generate_audio():
             result = audio.generate_audio(text)
         
         if result:
-            filepath, webpath, filename = result
+            filepath, webpath = result
+            filename = os.path.basename(filepath)
             audio_play_url = f'/uploads/audio/{filename}'
             audio_download_url = f'/api/download/audio/{filename}'
             return jsonify({
@@ -555,7 +582,7 @@ def generate_audio_script():
         
         print(f"🎙️ Generating audio script for: {topic} (Length: {length})")
         
-        gemini = get_groq()
+        gemini = get_groq() or GroqAIUtils()
         script = gemini.generate_audio_script(topic, length)
         
         print(f"📝 Script generated, length: {len(script)} characters")
@@ -565,7 +592,8 @@ def generate_audio_script():
         audio_result = audio.generate_educational_audio(script, topic)
         
         if audio_result:
-            filepath, webpath, filename = audio_result
+            filepath, webpath = audio_result
+            filename = os.path.basename(filepath)
             print(f"✅ Audio file created: {filename}")
             
             audio_play_url = f'/api/download/audio/{filename}?mode=play'
@@ -615,7 +643,7 @@ def generate_image():
         
         print(f"🎨 Generating {diagram_type} diagram for: {concept}")
         
-        gemini = get_groq()
+        gemini = get_groq() or GroqAIUtils()
         prompt = gemini.generate_image_prompt(concept, diagram_type)
         
         print(f"📝 Prompt generated for image creation")
@@ -676,15 +704,15 @@ def generate_images_multiple():
         generated_images = []
         
         for i, (diagram_type, perspective) in enumerate(perspectives):
+            perspective_label = f"{perspective.title()}" if perspective else "General"
             print(f"📐 Creating {diagram_type} diagram - {perspective or 'general'} ({i+1}/{count})...")
-            
+
             # Generate unique prompt for this perspective
             prompt = gemini.generate_image_prompt(concept, diagram_type, perspective)
             result = images_obj.generate_image_from_prompt(prompt, filename=None, diagram_type=diagram_type, topic=concept)
-            
+
             if result:
                 filepath, webpath = result
-                perspective_label = f"{perspective.title()}" if perspective else "General"
                 generated_images.append({
                     'image_url': webpath,
                     'diagram_type': diagram_type,
@@ -913,8 +941,8 @@ def generate_complete_lesson():
             'audio': {
                 'script': script,
                 'download_url': audio_file[1] if audio_file else None,
-                'filename': audio_file[2] if audio_file else None,
-                'api_download_url': f'/api/download/audio/{audio_file[2]}' if audio_file else None
+                'filename': os.path.basename(audio_file[0]) if audio_file else None,
+                'api_download_url': f'/api/download/audio/{os.path.basename(audio_file[0])}' if audio_file else None
             },
             'image': {
                 'prompt': image_prompt,
@@ -990,7 +1018,9 @@ def forbidden_error(error):
 @require_login
 def get_course_progress_api():
     """Get course progress for current user"""
-    username = request.username
+    username = getattr(request, 'username', None)
+    if not username:
+        return jsonify({'error': 'Login required'}), 401
     progress = get_course_progress(username)
     return jsonify({'success': True, 'progress': progress})
 
@@ -1034,7 +1064,9 @@ def get_dashboard_progress():
 @require_login
 def update_progress():
     """Update progress for a topic"""
-    username = request.username
+    username = getattr(request, 'username', None)
+    if not username:
+        return jsonify({'error': 'Login required'}), 401
     data = request.get_json()
     topic_id = data.get('topic_id')
     completed = data.get('completed', True)
@@ -1087,7 +1119,9 @@ def update_progress():
 def get_course_progress_data():
     """Get user's course progress"""
     try:
-        username = request.username
+        username = getattr(request, 'username', None)
+        if not username:
+            return jsonify({'error': 'Login required'}), 401
         progress = get_course_progress(username)
         return jsonify({'success': True, 'progress': progress})
     except Exception as e:
@@ -1097,7 +1131,9 @@ def get_course_progress_data():
 @require_login
 def get_next_topic_api():
     """Get next recommended topic for user"""
-    username = request.username
+    username = getattr(request, 'username', None)
+    if not username:
+        return jsonify({'error': 'Login required'}), 401
     next_topic = get_next_topic(username)
     return jsonify({'success': True, 'next_topic': next_topic})
 
@@ -1105,7 +1141,9 @@ def get_next_topic_api():
 @require_login
 def get_available_topics_api():
     """Get all available topics for user"""
-    username = request.username
+    username = getattr(request, 'username', None)
+    if not username:
+        return jsonify({'error': 'Login required'}), 401
     available_topics = get_available_topics(username)
     return jsonify({'success': True, 'available_topics': available_topics})
 
@@ -1113,7 +1151,9 @@ def get_available_topics_api():
 @require_login
 def reset_progress():
     """Reset user progress"""
-    username = request.username
+    username = getattr(request, 'username', None)
+    if not username:
+        return jsonify({'error': 'Login required'}), 401
     reset_user_progress(username)
     return jsonify({'success': True, 'message': 'Progress reset successfully'})
 
@@ -1156,7 +1196,9 @@ def generate_realtime_quiz():
 def get_adaptive_quiz():
     """Generate an adaptive quiz based on user performance"""
     try:
-        username = request.username
+        username = getattr(request, 'username', None)
+        if not username:
+            return jsonify({'error': 'Login required'}), 401
         data = request.get_json()
         topic = data.get('topic', '')
 
@@ -1206,7 +1248,9 @@ def get_adaptive_quiz():
 def analyze_quiz_performance():
     """Analyze quiz performance using ML models"""
     try:
-        username = request.username
+        username = getattr(request, 'username', None)
+        if not username:
+            return jsonify({'error': 'Login required'}), 401
         data = request.get_json()
         quiz_results = data.get('quiz_results', [])
 
@@ -1244,7 +1288,9 @@ def analyze_quiz_performance():
 def submit_quiz():
     """Submit quiz answers and get results with AI analysis"""
     try:
-        username = request.username
+        username = getattr(request, 'username', None)
+        if not username:
+            return jsonify({'error': 'Login required'}), 401
         data = request.get_json()
 
         quiz_id = data.get('quiz_id')
@@ -1337,16 +1383,17 @@ def error_teaching():
         
         # Persist a lightweight "error-based learning" signal in progress history
         try:
-            username = request.username
-            # mark as viewed/needs-review without completing topic
-            update_topic_progress(
-                username=username,
-                topic_id=str(topic),
-                completed=False,
-                time_spent=0,
-                modality="text",
-                event="error_teaching_requested",
-            )
+            username = getattr(request, 'username', None)
+            if username:
+                # mark as viewed/needs-review without completing topic
+                update_topic_progress(
+                    username=username,
+                    topic_id=str(topic),
+                    completed=False,
+                    time_spent=0,
+                    modality="text",
+                    event="error_teaching_requested",
+                )
         except Exception:
             pass
 
@@ -1440,7 +1487,9 @@ def progress_dashboard():
 @require_login
 def quiz_page(topic):
     """Quiz page for a specific topic"""
-    username = request.username
+    username = getattr(request, 'username', None)
+    if not username:
+        return redirect(url_for('login'))
     progress = get_course_progress(username)
     
     # Inline get_module_for_topic with validation

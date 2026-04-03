@@ -353,6 +353,644 @@
           "modality": "text"
         }
       ]
+    },
+    "Snigdha257": {
+      "username": "Snigdha257",
+      "started_at": "2026-02-07T12:03:47.008067",
+      "modules_completed": [
+        "ml_basics"
+      ],
+      "topics_completed": [
+        "what_is_ml",
+        "data_types",
+        "ml_workflow",
+        "data_cleaning",
+        "feature_engineering"
+      ],
+      "quiz_scores": {
+        "neural networks": 40.0
+      },
+      "current_module": "ml_basics",
+      "current_topic": "feature_engineering",
+      "total_time_spent": 3,
+      "last_activity": "2026-02-07T12:25:22.121014",
+      "modality_usage": {
+        "text": 4,
+        "code": 2,
+        "audio": 0,
+        "image": 0
+      },
+      "interaction_history": [
+        {
+          "ts": "2026-02-07T12:04:05.820783",
+          "topic_id": "what_is_ml",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T12:05:43.954665",
+          "topic_id": "data_types",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T12:05:54.918635",
+          "topic_id": "ml_workflow",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T12:09:01.152283",
+          "topic_id": "ml_workflow",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 3,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T12:21:26.898054",
+          "topic_id": "data_cleaning",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "code"
+        },
+        {
+          "ts": "2026-02-07T12:24:03.023261",
+          "topic_id": "feature_engineering",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "code"
+        },
+        {
+          "ts": "2026-02-07T12:25:22.121032",
+          "topic_id": "neural networks",
+          "event": "quiz_submitted",
+          "score": 40.0,
+          "passed": false
+        }
+      ],
+      "error_patterns": {
+        "neural networks": {
+          "attempts": 1,
+          "failures": 1,
+          "last_score": 40.0
+        }
+      }
+    },
+    "Snigdha": {
+      "username": "Snigdha",
+      "started_at": "2026-02-07T12:26:33.992139",
+      "modules_completed": [
+        "ml_basics"
+      ],
+      "topics_completed": [
+        "what_is_ml",
+        "data_types",
+        "ml_workflow",
+        "data_cleaning"
+      ],
+      "quiz_scores": {
+        "neural networks": 60.0
+      },
+      "current_module": "ml_basics",
+      "current_topic": "data_cleaning",
+      "total_time_spent": 0,
+      "last_activity": "2026-02-07T12:28:52.582062",
+      "modality_usage": {
+        "text": 3,
+        "code": 1,
+        "audio": 0,
+        "image": 0
+      },
+      "interaction_history": [
+        {
+          "ts": "2026-02-07T12:26:48.448046",
+          "topic_id": "what_is_ml",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T12:26:58.409474",
+          "topic_id": "data_types",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T12:27:08.330015",
+          "topic_id": "ml_workflow",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T12:27:19.538996",
+          "topic_id": "data_cleaning",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "code"
+        },
+        {
+          "ts": "2026-02-07T12:28:52.582084",
+          "topic_id": "neural networks",
+          "event": "quiz_submitted",
+          "score": 60.0,
+          "passed": false
+        }
+      ],
+      "error_patterns": {
+        "neural networks": {
+          "attempts": 1,
+          "failures": 1,
+          "last_score": 60.0
+        }
+      }
+    },
+    "Snigdha25": {
+      "username": "Snigdha25",
+      "started_at": "2026-02-07T12:41:58.889221",
+      "modules_completed": [],
+      "topics_completed": [
+        "what_is_ml"
+      ],
+      "quiz_scores": {
+        "gen ai": 0.0
+      },
+      "current_module": "ml_basics",
+      "current_topic": "what_is_ml",
+      "total_time_spent": 1,
+      "last_activity": "2026-02-07T12:47:40.198695",
+      "modality_usage": {
+        "text": 1,
+        "code": 0,
+        "audio": 0,
+        "image": 0
+      },
+      "interaction_history": [
+        {
+          "ts": "2026-02-07T12:43:08.917674",
+          "topic_id": "what_is_ml",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 1,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T12:47:40.198703",
+          "topic_id": "gen ai",
+          "event": "quiz_submitted",
+          "score": 0.0,
+          "passed": false
+        }
+      ],
+      "error_patterns": {
+        "gen ai": {
+          "attempts": 1,
+          "failures": 1,
+          "last_score": 0.0
+        }
+      }
+    },
+    "rekha": {
+      "username": "rekha",
+      "started_at": "2026-02-07T14:42:14.869910",
+      "modules_completed": [],
+      "topics_completed": [
+        "what_is_ml"
+      ],
+      "quiz_scores": {},
+      "current_module": "ml_basics",
+      "current_topic": "what_is_ml",
+      "total_time_spent": 0,
+      "last_activity": "2026-02-07T14:43:12.778626",
+      "modality_usage": {
+        "text": 1,
+        "code": 0,
+        "audio": 0,
+        "image": 0
+      },
+      "interaction_history": [
+        {
+          "ts": "2026-02-07T14:43:12.778637",
+          "topic_id": "what_is_ml",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        }
+      ]
+    },
+    "rekha123": {
+      "username": "rekha123",
+      "started_at": "2026-02-07T15:03:09.986156",
+      "modules_completed": [
+        "ml_basics"
+      ],
+      "topics_completed": [
+        "what_is_ml",
+        "data_types",
+        "ml_workflow",
+        "data_cleaning"
+      ],
+      "quiz_scores": {
+        "neural networks": 0.0
+      },
+      "current_module": "ml_basics",
+      "current_topic": "data_cleaning",
+      "total_time_spent": 2,
+      "last_activity": "2026-02-07T15:07:25.194947",
+      "modality_usage": {
+        "text": 3,
+        "code": 1,
+        "audio": 0,
+        "image": 0
+      },
+      "interaction_history": [
+        {
+          "ts": "2026-02-07T15:03:51.272014",
+          "topic_id": "what_is_ml",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T15:04:03.598372",
+          "topic_id": "data_types",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T15:04:16.840884",
+          "topic_id": "ml_workflow",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T15:05:55.450142",
+          "topic_id": "data_cleaning",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 2,
+          "modality": "code"
+        },
+        {
+          "ts": "2026-02-07T15:07:25.194982",
+          "topic_id": "neural networks",
+          "event": "quiz_submitted",
+          "score": 0.0,
+          "passed": false
+        }
+      ],
+      "error_patterns": {
+        "neural networks": {
+          "attempts": 1,
+          "failures": 1,
+          "last_score": 0.0
+        }
+      }
+    },
+    "Ano123": {
+      "username": "Ano123",
+      "started_at": "2026-02-07T15:22:07.235948",
+      "modules_completed": [
+        "ml_basics"
+      ],
+      "topics_completed": [
+        "what_is_ml",
+        "ml_workflow",
+        "data_types",
+        "data_cleaning"
+      ],
+      "quiz_scores": {
+        "neural networks": 20.0
+      },
+      "current_module": "ml_basics",
+      "current_topic": "data_cleaning",
+      "total_time_spent": 0,
+      "last_activity": "2026-02-07T16:40:29.030925",
+      "modality_usage": {
+        "text": 3,
+        "code": 1,
+        "audio": 0,
+        "image": 0
+      },
+      "interaction_history": [
+        {
+          "ts": "2026-02-07T15:22:48.033179",
+          "topic_id": "what_is_ml",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T15:23:09.383217",
+          "topic_id": "ml_workflow",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T15:24:20.564787",
+          "topic_id": "neural networks",
+          "event": "quiz_submitted",
+          "score": 20.0,
+          "passed": false
+        },
+        {
+          "ts": "2026-02-07T15:25:48.488999",
+          "topic_id": "data_types",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T15:28:12.999644",
+          "topic_id": "neural networks",
+          "event": "quiz_submitted",
+          "score": 20.0,
+          "passed": false
+        },
+        {
+          "ts": "2026-02-07T16:40:29.030946",
+          "topic_id": "data_cleaning",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "code"
+        }
+      ],
+      "error_patterns": {
+        "neural networks": {
+          "attempts": 2,
+          "failures": 2,
+          "last_score": 20.0
+        }
+      }
+    },
+    "user1": {
+      "username": "user1",
+      "started_at": "2026-02-07T18:19:48.650622",
+      "modules_completed": [
+        "ml_basics"
+      ],
+      "topics_completed": [
+        "what_is_ml",
+        "data_types",
+        "ml_workflow",
+        "data_cleaning"
+      ],
+      "quiz_scores": {
+        "neural networks": 20.0,
+        "gen ai": 33.33333333333333
+      },
+      "current_module": "ml_basics",
+      "current_topic": "data_cleaning",
+      "total_time_spent": 0,
+      "last_activity": "2026-02-07T18:32:02.396471",
+      "modality_usage": {
+        "text": 3,
+        "code": 1,
+        "audio": 0,
+        "image": 0
+      },
+      "interaction_history": [
+        {
+          "ts": "2026-02-07T18:20:20.718295",
+          "topic_id": "what_is_ml",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T18:21:39.621633",
+          "topic_id": "data_types",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T18:22:52.006129",
+          "topic_id": "neural networks",
+          "event": "quiz_submitted",
+          "score": 20.0,
+          "passed": false
+        },
+        {
+          "ts": "2026-02-07T18:29:27.344772",
+          "topic_id": "ml_workflow",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T18:29:46.624581",
+          "topic_id": "data_cleaning",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "code"
+        },
+        {
+          "ts": "2026-02-07T18:32:02.396495",
+          "topic_id": "gen ai",
+          "event": "quiz_submitted",
+          "score": 33.33333333333333,
+          "passed": false
+        }
+      ],
+      "error_patterns": {
+        "neural networks": {
+          "attempts": 1,
+          "failures": 1,
+          "last_score": 20.0
+        },
+        "gen ai": {
+          "attempts": 1,
+          "failures": 1,
+          "last_score": 33.33333333333333
+        }
+      }
+    },
+    "user7": {
+      "username": "user7",
+      "started_at": "2026-02-07T18:37:53.184231",
+      "modules_completed": [
+        "ml_basics"
+      ],
+      "topics_completed": [
+        "what_is_ml",
+        "data_types",
+        "ml_workflow",
+        "data_cleaning",
+        "feature_engineering"
+      ],
+      "quiz_scores": {
+        "neural networks": 66.66666666666666,
+        "gen ai": 100.0
+      },
+      "current_module": "ml_basics",
+      "current_topic": "feature_engineering",
+      "total_time_spent": 0,
+      "last_activity": "2026-03-12T09:56:12.272617",
+      "modality_usage": {
+        "text": 3,
+        "code": 2,
+        "audio": 0,
+        "image": 0
+      },
+      "interaction_history": [
+        {
+          "ts": "2026-02-07T18:38:17.044937",
+          "topic_id": "what_is_ml",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T18:38:32.340918",
+          "topic_id": "data_types",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T18:43:30.365544",
+          "topic_id": "ml_workflow",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-02-07T18:43:50.032061",
+          "topic_id": "data_cleaning",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "code"
+        },
+        {
+          "ts": "2026-02-07T18:45:19.001712",
+          "topic_id": "neural networks",
+          "event": "quiz_submitted",
+          "score": 66.66666666666666,
+          "passed": false
+        },
+        {
+          "ts": "2026-03-12T09:33:01.390093",
+          "topic_id": "feature_engineering",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "code"
+        },
+        {
+          "ts": "2026-03-12T09:56:10.926895",
+          "topic_id": "gen ai",
+          "event": "quiz_submitted",
+          "score": 100.0,
+          "passed": true
+        },
+        {
+          "ts": "2026-03-12T09:56:12.272648",
+          "topic_id": "gen ai",
+          "event": "quiz_submitted",
+          "score": 100.0,
+          "passed": true
+        }
+      ],
+      "error_patterns": {
+        "neural networks": {
+          "attempts": 1,
+          "failures": 1,
+          "last_score": 66.66666666666666
+        },
+        "gen ai": {
+          "attempts": 2,
+          "failures": 0,
+          "last_score": 100.0
+        }
+      }
+    },
+    "user9": {
+      "username": "user9",
+      "started_at": "2026-03-12T10:42:26.180606",
+      "modules_completed": [],
+      "topics_completed": [
+        "what_is_ml",
+        "data_types"
+      ],
+      "quiz_scores": {
+        "gen ai": 33.33333333333333
+      },
+      "current_module": "ml_basics",
+      "current_topic": "data_types",
+      "total_time_spent": 0,
+      "last_activity": "2026-03-12T11:42:38.145459",
+      "modality_usage": {
+        "text": 2,
+        "code": 0,
+        "audio": 0,
+        "image": 0
+      },
+      "interaction_history": [
+        {
+          "ts": "2026-03-12T10:53:15.005824",
+          "topic_id": "what_is_ml",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-03-12T11:37:10.627596",
+          "topic_id": "data_types",
+          "event": "generated",
+          "completed": true,
+          "time_spent": 0,
+          "modality": "text"
+        },
+        {
+          "ts": "2026-03-12T11:42:38.145567",
+          "topic_id": "gen ai",
+          "event": "quiz_submitted",
+          "score": 33.33333333333333,
+          "passed": false
+        }
+      ],
+      "error_patterns": {
+        "gen ai": {
+          "attempts": 1,
+          "failures": 1,
+          "last_score": 33.33333333333333
+        }
+      }
     }
   }
 }

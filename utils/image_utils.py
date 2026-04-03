@@ -146,7 +146,6 @@ class ImageUtils:
                 print("[ERROR] HUGGINGFACE_API_KEY not set or is invalid for Stable Diffusion")
                 print("   Get your token from: https://huggingface.co/settings/tokens")
                 print("   Set the HUGGINGFACE_API_KEY environment variable")
->>>>>>> clean-main
                 return None
                 
         except Exception as e:
@@ -258,7 +257,6 @@ class ImageUtils:
                 
         except requests.exceptions.Timeout:
             print(f"[ERROR] Stable Diffusion request timed out (30 seconds). Model may be slow to respond.")
->>>>>>> clean-main
             return None
         except:
             return None
