@@ -4,7 +4,7 @@ ML Learning Assistant - Main Flask Application
 GyanGuru: AI Powered Learning Assistant for AI & ML
 """
 
-from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for, abort
 from flask_cors import CORS
 from datetime import datetime
 import os
@@ -14,26 +14,44 @@ import time
 from werkzeug.utils import secure_filename
 
 # Import utility modules
-from utils.genai_utils import get_groq, init_groq
+from utils.genai_utils import GroqAIUtils, get_groq, init_groq
 from utils.audio_utils import get_audio, init_audio
 from utils.image_utils import get_images, init_images
 from utils.code_executor import get_code_executor, init_code_executor
-from utils.auth_utils import generate_token, verify_token, token_required, require_login
-from utils.progress_utils import get_course_progress, update_topic_progress, get_next_topic, get_available_topics, reset_user_progress, get_course_statistics, update_quiz_score
-from utils.quiz_utils import get_quiz_system, init_quiz
-from utils.hf_utils import hf_manager, init_hf_models
+from models.user import ensure_users_file, User
+from utils.quiz_utils import init_quiz, get_quiz_system
+from utils.hf_utils import init_hf_models, hf_manager
+from utils.auth_utils import require_login, generate_token, verify_token, token_required
 from utils.sklearn_utils import sklearn_manager
-from models.user import User, ensure_users_file
+from utils.progress_utils import (
+    get_course_progress,
+    update_topic_progress,
+    get_next_topic,
+    get_available_topics,
+    reset_user_progress,
+    get_module_for_topic,
+    get_course_statistics,
+    update_quiz_score,
+)
+import logging
+# Configure logging to file
+logging.basicConfig(
+    filename='flask_debug.log',
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s: %(message)s'
+)
 
 # Load environment variables
 from dotenv import load_dotenv
 load_dotenv()
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
+app = Flask(__name__, template_folder='templates')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'iichackathon')
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max
-app.config['SESSION_TYPE'] = 'filesystem'
+app.config['TEMPLATES_AUTO_RELOAD'] = True  # Force template reloading
+app.jinja_env.auto_reload = True  # Force Jinja2 auto-reload
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # Disable file caching
 
 # Enable CORS
 CORS(app)
@@ -48,12 +66,61 @@ os.makedirs('uploads/code', exist_ok=True)
 ensure_users_file()
 
 # Initialize utility modules
-init_groq(os.getenv('GROQ_API_KEY'))
+init_groq() # Automatically loads from GROQ_API_KEY env var
 init_audio()
 init_images()
 init_code_executor()
 init_quiz()
 init_hf_models()
+
+# Create local instances for easier use and to satisfy static analysis
+groq = get_groq() or GroqAIUtils()
+audio = get_audio()
+images = get_images()
+executor = get_code_executor()
+quiz_system = get_quiz_system()
+
+# ensure hf_manager and sklearn_manager are available
+hf = hf_manager
+sklearn_mgr = sklearn_manager
+
+# ============================================
+# STATIC FILES SERVING
+# ============================================
+
+# Serve uploaded files
+@app.route('/uploads/<path:filepath>')
+def serve_upload(filepath):
+    """Serve uploaded files (audio, images, code)"""
+    print(f"📁 Upload request for: {filepath}")
+    try:
+        full_path = os.path.join('uploads', filepath)
+        print(f"📂 Full path: {full_path}")
+        print(f"📂 File exists: {os.path.exists(full_path)}")
+        if os.path.exists(full_path):
+            # Determine MIME type based on file extension
+            mimetype = 'application/octet-stream'
+            if filepath.lower().endswith('.mp3'):
+                mimetype = 'audio/mpeg'
+            elif filepath.lower().endswith('.wav'):
+                mimetype = 'audio/wav'
+            elif filepath.lower().endswith('.png'):
+                mimetype = 'image/png'
+            elif filepath.lower().endswith('.jpg') or filepath.lower().endswith('.jpeg'):
+                mimetype = 'image/jpeg'
+            elif filepath.lower().endswith('.py'):
+                mimetype = 'text/plain'
+            
+            # Serve file inline (for playing in browser) not as attachment
+            response = send_file(full_path, mimetype=mimetype, as_attachment=False)
+            # Add headers for better caching and browser support
+            response.headers['Cache-Control'] = 'public, max-age=86400'
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            return response
+        else:
+            return jsonify({'error': 'File not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # ============================================
 # PAGE ROUTES
@@ -260,7 +327,7 @@ def check_auth():
 @require_login
 def user_profile():
     """Get current user profile"""
-    username = request.username
+    username = getattr(request, 'username', None)
     user = User.get_by_username(username)
     
     if user:
@@ -367,11 +434,7 @@ def generate_explanation():
         if not topic:
             return jsonify({'error': 'Topic is required'}), 400
         
-        print("[INFO] Initializing Groq client...")
-        gemini = get_groq()
-        print("[INFO] Groq client initialized")
-        
-        print("[INFO] Generating explanation...")
+        gemini = get_groq() or GroqAIUtils()
         explanation = gemini.generate_text_explanation(topic, complexity)
         print(f"[INFO] Explanation generated (first 100 chars): {explanation[:100]}...")
         
@@ -400,18 +463,22 @@ def generate_code():
         algorithm = data.get('algorithm', '')
         complexity = data.get('complexity', 'Detailed')
         
+        print(f"🔧 Code generation request: algorithm='{algorithm}', complexity='{complexity}'")
+        
         if not algorithm:
             return jsonify({'error': 'Algorithm is required'}), 400
         
-        gemini = get_groq()
+        gemini = get_groq() or GroqAIUtils()
         code = gemini.generate_code_example(algorithm, complexity)
-
-        executor = get_code_executor()
-        code = executor.sanitize_code(code)
-
+        
+        print(f"📝 Generated code length: {len(code)} characters")
+        print(f"📝 Code preview: {code[:200]}...")
+        
         # Detect dependencies
-        dependencies = executor.detect_dependencies(code)
-
+        dependencies = get_code_executor().detect_dependencies(code)
+        
+        print(f"📦 Dependencies detected: {dependencies}")
+        
         # Validate syntax
         is_valid, error = executor.validate_syntax(code)
 
@@ -430,6 +497,7 @@ def generate_code():
             'generated_at': datetime.now().isoformat()
         })
     except Exception as e:
+        print(f"💥 Error in code generation: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/code-execution-guide', methods=['POST'])
@@ -475,23 +543,24 @@ def generate_audio():
             return jsonify({'error': 'Text content is required'}), 400
         
         audio = get_audio()
-
-        # Generate audio safely, handling possible failures
+        result = None
+        
         if audio_type == 'script':
             result = audio.generate_educational_audio(text, topic)
         else:
             result = audio.generate_audio(text)
-
-        if not result or len(result) != 2:
-            return jsonify({'error': 'Failed to generate audio'}), 500
-
-        filepath, webpath = result
-
-        if filepath:
+        
+        if result:
+            filepath, webpath = result
+            filename = os.path.basename(filepath)
+            audio_play_url = f'/uploads/audio/{filename}'
+            audio_download_url = f'/api/download/audio/{filename}'
             return jsonify({
                 'success': True,
-                'audio_url': webpath,
+                'audio_url': audio_play_url,
                 'audio_path': filepath,
+                'filename': filename,
+                'download_url': audio_download_url,
                 'topic': topic,
                 'generated_at': datetime.now().isoformat()
             })
@@ -511,29 +580,49 @@ def generate_audio_script():
         if not topic:
             return jsonify({'error': 'Topic is required'}), 400
         
-        gemini = get_groq()
+        print(f"🎙️ Generating audio script for: {topic} (Length: {length})")
+        
+        gemini = get_groq() or GroqAIUtils()
         script = gemini.generate_audio_script(topic, length)
-
-        # Generate audio from script (best-effort; script is still useful even if audio fails)
-        audio_url = None
-        try:
-            audio = get_audio()
-            audio_result = audio.generate_educational_audio(script, topic)
-            if audio_result and len(audio_result) == 2:
-                _, audio_url = audio_result
-        except Exception as audio_error:
-            # Log but don't fail the whole request – frontend can still use the script
-            print(f"[WARN] Failed to generate audio for script: {audio_error}")
-
-        return jsonify({
-            'success': True,
-            'script': script,
-            'topic': topic,
-            'length': length,
-            'audio_url': audio_url,
-            'generated_at': datetime.now().isoformat()
-        })
+        
+        print(f"📝 Script generated, length: {len(script)} characters")
+        
+        # Generate audio from script
+        audio = get_audio()
+        audio_result = audio.generate_educational_audio(script, topic)
+        
+        if audio_result:
+            filepath, webpath = audio_result
+            filename = os.path.basename(filepath)
+            print(f"✅ Audio file created: {filename}")
+            
+            audio_play_url = f'/api/download/audio/{filename}?mode=play'
+            audio_download_url = f'/api/download/audio/{filename}'
+            
+            return jsonify({
+                'success': True,
+                'script': script,
+                'topic': topic,
+                'length': length,
+                'audio_url': audio_play_url,
+                'filename': filename,
+                'download_url': audio_download_url,
+                'generated_at': datetime.now().isoformat()
+            })
+        else:
+            print("❌ Audio generation failed")
+            return jsonify({
+                'success': True,
+                'script': script,
+                'topic': topic,
+                'length': length,
+                'audio_url': None,
+                'filename': None,
+                'message': 'Script generated but audio generation failed',
+                'generated_at': datetime.now().isoformat()
+            })
     except Exception as e:
+        print(f"💥 Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 # ============================================
@@ -552,136 +641,89 @@ def generate_image():
         if not concept:
             return jsonify({'error': 'Concept is required'}), 400
         
-        gemini = get_groq()
-
-        # Build a more controlled, topic-relevant prompt for Hugging Face image generation
-        dt_lower = str(diagram_type).lower()
-        if dt_lower == 'flowchart':
-            prompt = (
-                f"Educational flowchart diagram about: {concept}. "
-                f"Clean vector style, white background, clear labeled boxes and arrows, readable text. "
-                f"Show key steps and decision points."
-            )
-        elif dt_lower == 'technical':
-            prompt = (
-                f"Technical architecture diagram about: {concept}. "
-                f"Clean infographic / vector style, white background, labeled components and connections. "
-                f"Focus on structure and data flow."
-            )
-        else:
-            prompt = (
-                f"Educational concept diagram about: {concept}. "
-                f"Clean infographic / vector style, white background, labeled main parts."
-            )
-
-        # For placeholder diagrams, keep using the richer AI-generated prompt (helps detection)
-        if backend != 'stable_diffusion':
-            prompt = gemini.generate_image_prompt(concept, diagram_type)
-
+        print(f"🎨 Generating {diagram_type} diagram for: {concept}")
+        
+        gemini = get_groq() or GroqAIUtils()
+        prompt = gemini.generate_image_prompt(concept, diagram_type)
+        
+        print(f"📝 Prompt generated for image creation")
+        
         images = get_images()
-
-        force_type = None
-        if str(diagram_type).lower() == 'flowchart':
-            force_type = 'flowchart'
-        elif str(diagram_type).lower() == 'technical':
-            force_type = 'architecture'
-
-        warning = None
-
-        result = images.generate_image_from_prompt(
-            prompt,
-            use_api=backend,
-            diagram_type=force_type,
-            variation=0,
-        )
+        logging.debug(f"Calling generate_image_from_prompt for {concept}")
+        result = images.generate_image_from_prompt(prompt, filename=None, diagram_type=diagram_type, use_api=backend, topic=concept)
+        logging.debug(f"Generation result: {result}")
         
-        # If Stable Diffusion fails, fallback to placeholder
-        if result is None and backend == 'stable_diffusion':
-            print("[WARNING] Stable Diffusion failed, falling back to Smart Diagrams")
-            warning = 'Hugging Face image generation failed; fell back to Smart Diagrams. Check HF_TOKEN / model availability.'
-            result = images.generate_image_from_prompt(
-                prompt,
-                use_api='placeholder',
-                diagram_type=force_type,
-                variation=0,
-            )
-        
-        if result and len(result) == 2:
+        if result:
             filepath, webpath = result
+            print(f"✅ Image generated successfully: {diagram_type}")
             return jsonify({
                 'success': True,
                 'image_url': webpath,
                 'concept': concept,
                 'diagram_type': diagram_type,
-                'prompt': prompt,
-                'backend_used': 'placeholder' if backend == 'stable_diffusion' and warning else backend,
-                'warning': warning,
+                'prompt': prompt[:200] if len(prompt) > 200 else prompt,
                 'generated_at': datetime.now().isoformat()
             })
         else:
-            return jsonify({'error': 'Failed to generate image'}), 500
+            print(f"❌ Image generation failed completely - both API and fallback")
+            return jsonify({
+                'success': False,
+                'error': 'Image generation service unavailable. Please try again later.',
+                'concept': concept,
+                'diagram_type': diagram_type
+            }), 503  # Service Unavailable
     except Exception as e:
-        print(f"[ERROR] Error in /api/generate-image: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        print(f"💥 Error generating image: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'Error: {str(e)}'
+        }), 500
 
 @app.route('/api/generate-images-multiple', methods=['POST'])
 def generate_images_multiple():
-    """Generate multiple diagrams with different types and styles for a concept"""
+    """Generate multiple diverse diagrams for a concept from different perspectives"""
     try:
         data = request.get_json()
         concept = data.get('concept', '')
-        count = min(int(data.get('count', 1)), 5)  # Max 5 images
-        diagram_type = data.get('diagram_type')
-        backend = data.get('backend', 'placeholder')
+        count = min(int(data.get('count', 4)), 5)  # Max 5 images
         
         if not concept:
             return jsonify({'error': 'Concept is required'}), 400
         
+        print(f"🖼️ Generating {count} diverse diagrams for: {concept}")
+        
         gemini = get_groq()
         images_obj = get_images()
         
-        generated_images = []
-
-        force_type = None
-        if diagram_type:
-            dt_lower = str(diagram_type).lower()
-            if dt_lower == 'flowchart':
-                force_type = 'flowchart'
-            elif dt_lower == 'technical':
-                force_type = 'architecture'
+        # Get diverse perspectives for this topic
+        all_perspectives = gemini.get_diverse_perspectives(concept)
+        perspectives = all_perspectives[:count]
         
-        for i in range(count):
-            variation = i % 5
+        generated_images = []
+        
+        for i, (diagram_type, perspective) in enumerate(perspectives):
+            perspective_label = f"{perspective.title()}" if perspective else "General"
+            print(f"📐 Creating {diagram_type} diagram - {perspective or 'general'} ({i+1}/{count})...")
 
-            prompt = gemini.generate_image_prompt(concept, diagram_type or 'Conceptual')
-            result = images_obj.generate_image_from_prompt(
-                prompt,
-                diagram_type=force_type,
-                variation=variation,
-                use_api=backend
-            )
+            # Generate unique prompt for this perspective
+            prompt = gemini.generate_image_prompt(concept, diagram_type, perspective)
+            result = images_obj.generate_image_from_prompt(prompt, filename=None, diagram_type=diagram_type, topic=concept)
 
-            if result is None and backend == 'stable_diffusion':
-                result = images_obj.generate_image_from_prompt(
-                    prompt,
-                    diagram_type=force_type,
-                    variation=variation,
-                    use_api='placeholder'
-                )
-
-            # Skip if image generation failed
-            if not result or len(result) != 2:
-                continue
-
-            filepath, webpath = result
-
-            if filepath:
+            if result:
+                filepath, webpath = result
                 generated_images.append({
                     'image_url': webpath,
-                    'diagram_type': diagram_type or 'Conceptual',
-                    'variation': variation,
-                    'prompt': prompt[:100] + '...' if len(prompt) > 100 else prompt
+                    'diagram_type': diagram_type,
+                    'perspective': perspective_label,
+                    'prompt': prompt[:100] + "..." if len(prompt) > 100 else prompt
                 })
+                print(f"✅ {diagram_type} ({perspective_label}) diagram generated")
+            else:
+                print(f"⚠️ {diagram_type} ({perspective_label}) diagram generation failed")
+        
+        print(f"✅ Generated {len(generated_images)} unique diagrams")
         
         if not generated_images:
             return jsonify({'error': 'Failed to generate images'}), 500
@@ -694,6 +736,9 @@ def generate_images_multiple():
             'generated_at': datetime.now().isoformat()
         })
     except Exception as e:
+        print(f"💥 Error generating multiple images: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 # ============================================
@@ -706,8 +751,35 @@ def list_audio_files():
     try:
         audio = get_audio()
         files = audio.list_generated_files()
+        print(f"📊 Listed {len(files)} audio files")
         return jsonify({'success': True, 'files': files})
     except Exception as e:
+        print(f"❌ Error listing files: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/delete/audio/<filename>', methods=['DELETE'])
+def delete_audio_file(filename):
+    """Delete an audio file"""
+    print(f"🗑️ Delete request received for: {filename}")
+    try:
+        filename = secure_filename(filename)
+        print(f"🔒 Secure filename: {filename}")
+        filepath = os.path.join('uploads/audio', filename)
+        print(f"📁 Full path: {filepath}")
+        print(f"📂 File exists: {os.path.exists(filepath)}")
+        
+        if os.path.exists(filepath):
+            os.remove(filepath)
+            print(f"✅ File deleted successfully")
+            return jsonify({
+                'success': True,
+                'message': f'Audio file "{filename}" deleted successfully'
+            })
+        else:
+            print(f"❌ File not found")
+            return jsonify({'error': 'Audio file not found'}), 404
+    except Exception as e:
+        print(f"💥 Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/list-images', methods=['GET'])
@@ -730,23 +802,88 @@ def list_code_files():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# Audio playback endpoint (serves inline for browser playback)
+@app.route('/api/play/audio/<filename>', methods=['GET'])
+def play_audio(filename):
+    """Play audio file inline in browser"""
+    print(f"🎵 Play request for: {filename}")
+    try:
+        filename = secure_filename(filename)
+        print(f"🔒 Secure filename: {filename}")
+        filepath = os.path.join('uploads/audio', filename)
+        print(f"📁 Full path: {filepath}")
+        print(f"📂 File exists: {os.path.exists(filepath)}")
+        
+        if os.path.exists(filepath):
+            print(f"✅ Serving audio file")
+            # Serve inline for playback, not as attachment
+            response = send_file(
+                filepath,
+                mimetype='audio/mpeg',
+                as_attachment=False
+            )
+            # Add headers for streaming and caching
+            response.headers['Cache-Control'] = 'public, max-age=3600'
+            response.headers['Accept-Ranges'] = 'bytes'
+            return response
+        else:
+            print(f"❌ Audio file not found")
+            return jsonify({'error': 'Audio file not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/test')
+def test():
+    return "Server is working!"
+
+@app.route('/api/test-delete', methods=['DELETE'])
+def test_delete():
+    return jsonify({'success': True, 'message': 'Delete route works'})
+
 @app.route('/api/download/<file_type>/<filename>', methods=['GET'])
 def download_file(file_type, filename):
-    """Download generated files"""
+    """Download generated files with proper headers"""
     try:
         filename = secure_filename(filename)
         
         if file_type == 'audio':
             filepath = os.path.join('uploads/audio', filename)
+            mimetype = 'audio/mpeg'
         elif file_type == 'image':
             filepath = os.path.join('uploads/images', filename)
+            mimetype = 'image/png'
         elif file_type == 'code':
             filepath = os.path.join('uploads/code', filename)
+            mimetype = 'text/plain'
         else:
             return jsonify({'error': 'Invalid file type'}), 400
         
         if os.path.exists(filepath):
-            return send_file(filepath, as_attachment=True)
+            # Check if this is for playback or download
+            mode = request.args.get('mode', 'download')
+            as_attachment = (mode != 'play')
+            
+            response = send_file(
+                filepath,
+                mimetype=mimetype,
+                as_attachment=as_attachment,
+                download_name=filename if as_attachment else None
+            )
+            
+            if as_attachment:
+                # Download headers
+                response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+                response.headers['Pragma'] = 'no-cache'
+                response.headers['Expires'] = '0'
+            else:
+                # Playback headers -remove attachment header for inline playback
+                response.headers['Cache-Control'] = 'public, max-age=3600'
+                response.headers['Accept-Ranges'] = 'bytes'
+                # Remove Content-Disposition to allow inline playback
+                if 'Content-Disposition' in response.headers:
+                    del response.headers['Content-Disposition']
+            
+            return response
         else:
             return jsonify({'error': 'File not found'}), 404
     except Exception as e:
@@ -803,7 +940,9 @@ def generate_complete_lesson():
             },
             'audio': {
                 'script': script,
-                'download_url': audio_file[1] if audio_file else None
+                'download_url': audio_file[1] if audio_file else None,
+                'filename': os.path.basename(audio_file[0]) if audio_file else None,
+                'api_download_url': f'/api/download/audio/{os.path.basename(audio_file[0])}' if audio_file else None
             },
             'image': {
                 'prompt': image_prompt,
@@ -879,7 +1018,9 @@ def forbidden_error(error):
 @require_login
 def get_course_progress_api():
     """Get course progress for current user"""
-    username = request.username
+    username = getattr(request, 'username', None)
+    if not username:
+        return jsonify({'error': 'Login required'}), 401
     progress = get_course_progress(username)
     return jsonify({'success': True, 'progress': progress})
 
@@ -923,7 +1064,9 @@ def get_dashboard_progress():
 @require_login
 def update_progress():
     """Update progress for a topic"""
-    username = request.username
+    username = getattr(request, 'username', None)
+    if not username:
+        return jsonify({'error': 'Login required'}), 401
     data = request.get_json()
     topic_id = data.get('topic_id')
     completed = data.get('completed', True)
@@ -976,7 +1119,9 @@ def update_progress():
 def get_course_progress_data():
     """Get user's course progress"""
     try:
-        username = request.username
+        username = getattr(request, 'username', None)
+        if not username:
+            return jsonify({'error': 'Login required'}), 401
         progress = get_course_progress(username)
         return jsonify({'success': True, 'progress': progress})
     except Exception as e:
@@ -986,7 +1131,9 @@ def get_course_progress_data():
 @require_login
 def get_next_topic_api():
     """Get next recommended topic for user"""
-    username = request.username
+    username = getattr(request, 'username', None)
+    if not username:
+        return jsonify({'error': 'Login required'}), 401
     next_topic = get_next_topic(username)
     return jsonify({'success': True, 'next_topic': next_topic})
 
@@ -994,7 +1141,9 @@ def get_next_topic_api():
 @require_login
 def get_available_topics_api():
     """Get all available topics for user"""
-    username = request.username
+    username = getattr(request, 'username', None)
+    if not username:
+        return jsonify({'error': 'Login required'}), 401
     available_topics = get_available_topics(username)
     return jsonify({'success': True, 'available_topics': available_topics})
 
@@ -1002,7 +1151,9 @@ def get_available_topics_api():
 @require_login
 def reset_progress():
     """Reset user progress"""
-    username = request.username
+    username = getattr(request, 'username', None)
+    if not username:
+        return jsonify({'error': 'Login required'}), 401
     reset_user_progress(username)
     return jsonify({'success': True, 'message': 'Progress reset successfully'})
 
@@ -1045,7 +1196,9 @@ def generate_realtime_quiz():
 def get_adaptive_quiz():
     """Generate an adaptive quiz based on user performance"""
     try:
-        username = request.username
+        username = getattr(request, 'username', None)
+        if not username:
+            return jsonify({'error': 'Login required'}), 401
         data = request.get_json()
         topic = data.get('topic', '')
 
@@ -1095,7 +1248,9 @@ def get_adaptive_quiz():
 def analyze_quiz_performance():
     """Analyze quiz performance using ML models"""
     try:
-        username = request.username
+        username = getattr(request, 'username', None)
+        if not username:
+            return jsonify({'error': 'Login required'}), 401
         data = request.get_json()
         quiz_results = data.get('quiz_results', [])
 
@@ -1133,7 +1288,9 @@ def analyze_quiz_performance():
 def submit_quiz():
     """Submit quiz answers and get results with AI analysis"""
     try:
-        username = request.username
+        username = getattr(request, 'username', None)
+        if not username:
+            return jsonify({'error': 'Login required'}), 401
         data = request.get_json()
 
         quiz_id = data.get('quiz_id')
@@ -1226,16 +1383,17 @@ def error_teaching():
         
         # Persist a lightweight "error-based learning" signal in progress history
         try:
-            username = request.username
-            # mark as viewed/needs-review without completing topic
-            update_topic_progress(
-                username=username,
-                topic_id=str(topic),
-                completed=False,
-                time_spent=0,
-                modality="text",
-                event="error_teaching_requested",
-            )
+            username = getattr(request, 'username', None)
+            if username:
+                # mark as viewed/needs-review without completing topic
+                update_topic_progress(
+                    username=username,
+                    topic_id=str(topic),
+                    completed=False,
+                    time_spent=0,
+                    modality="text",
+                    event="error_teaching_requested",
+                )
         except Exception:
             pass
 
@@ -1329,7 +1487,9 @@ def progress_dashboard():
 @require_login
 def quiz_page(topic):
     """Quiz page for a specific topic"""
-    username = request.username
+    username = getattr(request, 'username', None)
+    if not username:
+        return redirect(url_for('login'))
     progress = get_course_progress(username)
     
     # Inline get_module_for_topic with validation
@@ -1490,8 +1650,16 @@ def health():
 # ============================================
 
 if __name__ == '__main__':
+    port = int(os.getenv('FLASK_PORT', 5000))
+    host = '0.0.0.0'
+    print(f"\n{'='*60}")
+    print(f"🚀 Starting ML Learning Assistant...")
+    print(f"🌐 Running on: http://localhost:{port}")
+    print(f"🔧 Host: {host}")
+    print(f"{'='*60}\n")
+    
     app.run(
         debug=os.getenv('FLASK_ENV') == 'development',
-        host='0.0.0.0',
-        port=int(os.getenv('FLASK_PORT', 5000))
+        host=host,
+        port=port
     )
